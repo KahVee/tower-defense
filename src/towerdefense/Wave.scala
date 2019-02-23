@@ -1,0 +1,5 @@
+package towerdefense
+
+class Wave {
+  
+}
