@@ -6,6 +6,6 @@ package object towerdefense {
   val TileWidth = 64
   
   //TEMPORARY
-  val DefaultImage = new Image(new FileInputStream("D:\\Common\\School\\Programming\\ScalaKansio\\Tornipuolustus\\pics\\grass.png"), TileWidth, TileWidth, true, false)
-  val PathImage = new Image(new FileInputStream("D:\\Common\\School\\Programming\\ScalaKansio\\Tornipuolustus\\pics\\path.png"), TileWidth, TileWidth, true, false)
+  val DefaultImage = new Image(new FileInputStream("pics/grass.png"), TileWidth, TileWidth, true, false)
+  val PathImage = new Image(new FileInputStream("pics/path.png"), TileWidth, TileWidth, true, false)
 }

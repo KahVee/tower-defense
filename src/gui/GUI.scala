@@ -30,7 +30,7 @@ object GUI extends JFXApp {
 
   var game: Game = null
   private var tiles: Vector[(Image, Int, Int)] = null
-  private val canvas = new Canvas(TileWidth * 10 + 6, TileWidth * 10 + 100)
+  private val canvas = new Canvas(TileWidth * 10, TileWidth * 10)
   private val gc = canvas.graphicsContext2D
   private def fpsText = new Text {
     text = "FPS: " + (1.0 / dt).toInt
@@ -45,8 +45,8 @@ object GUI extends JFXApp {
 
     stage = new JFXApp.PrimaryStage {
       title.value = "Tower Defense"
-      width = TileWidth * 10 + 6
-      height = TileWidth * 10 + 100
+      width = TileWidth * 10
+      height = TileWidth * 10
       resizable = false
       onCloseRequest = e => quit()
       scene = new Scene {
