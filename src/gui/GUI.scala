@@ -33,7 +33,7 @@ object GUI extends JFXApp {
   private val canvas = new Canvas(TileWidth * 10 + 6, TileWidth * 10 + 100)
   private val gc = canvas.graphicsContext2D
   private def fpsText = new Text {
-    text = "FPS: " + (60.0 / dt).toInt
+    text = "FPS: " + (1.0 / dt).toInt
     y = 10
   }
   start()
