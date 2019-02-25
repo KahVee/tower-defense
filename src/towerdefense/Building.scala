@@ -1,11 +1,13 @@
 package towerdefense
 
-class Building extends Tile {
+import scalafx.scene.image._
+
+class Building(val image: Image) extends Tile(image) {
   
 }
 
 object Building {
   def apply(other: Building) = {
-    new Building
+    new Building(other.image)
   }
 }
