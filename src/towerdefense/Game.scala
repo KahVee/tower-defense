@@ -14,12 +14,17 @@ class Game(private val grid: Grid, var resX: Int, var rexY: Int, var buildableBu
 
   def step(dt: Float) = {
     enemies.foreach(_.step(dt))
+    health -= enemies.filter(_.reachedTarget).size
+    enemies = enemies.filterNot(_.reachedTarget)
     if (!waves.isEmpty) {
       if (timePassed > waves(0).time) {
         spawnWave(grid.entryTile, waves(0))
         waves = waves.tail
       }
     }
+
+    //DEBUG if (!enemies.isEmpty) enemies.foreach(x => println(x.coords))
+
     timePassed += dt
   }
 
