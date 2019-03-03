@@ -7,8 +7,9 @@ package object towerdefense {
   val TileSize = 64
 
   val EnemySize = 32
-  val DefaultEnemySpeed = 2
+  val DefaultEnemySpeed = 5
   val DefaultEnemyHealth = 10
+  val EnemySpawnInterval = 0.5
 
   //TEMPORARY
   val DefaultImage = new Image(new FileInputStream("pics/grass.png"), TileSize, TileSize, true, false)

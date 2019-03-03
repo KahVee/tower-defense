@@ -8,22 +8,27 @@ class Game(private val grid: Grid, var resX: Int, var rexY: Int, var buildableBu
   private var timePassed = 0F
 
   private var builtBuildings = Vector[Building]()
+  private var queuedEnemies = Vector[Enemy]()
+  private var lastSpawnedEnemyTime = 0F
 
-  private var outOfHealth = health <= 0
-  def isLost = outOfHealth
+  def isLost = health <= 0
 
   def step(dt: Float) = {
     enemies.foreach(_.step(dt))
     health -= enemies.filter(_.reachedTarget).size
     enemies = enemies.filterNot(_.reachedTarget)
+
     if (!waves.isEmpty) {
       if (timePassed > waves(0).time) {
-        spawnWave(grid.entryTile, waves(0))
+        spawnWave(waves(0))
         waves = waves.tail
       }
     }
 
-    //DEBUG if (!enemies.isEmpty) enemies.foreach(x => println(x.coords))
+    //If there are enemies in the spawn queue, spawn a new one when the appropriate time has passed
+    if (!queuedEnemies.isEmpty && timePassed > lastSpawnedEnemyTime + EnemySpawnInterval) spawnEnemyFromQueue
+
+    // DEBUG if (!enemies.isEmpty) enemies.foreach(x => println(x.coords))
 
     timePassed += dt
   }
@@ -47,10 +52,20 @@ class Game(private val grid: Grid, var resX: Int, var rexY: Int, var buildableBu
     tileArrayToVector(grid.grid) ++ enemyVectorToImageVector(enemies)
   }
 
-  //TODO: Make the wave spawning work on a timer
-  def spawnWave(tile: Tile, wave: Wave) = {
-    enemies = enemies :+ Enemy(wave.enemies(0)._1)
-    enemies.foreach(_.isActive = true)
+  //Activates the next enemy from the queue, adds it to the active enemies Vector, and updates the last spawned time
+  def spawnEnemyFromQueue = {
+      queuedEnemies(0).isActive = true
+      enemies = enemies :+ queuedEnemies(0)
+      queuedEnemies = queuedEnemies.tail
+      lastSpawnedEnemyTime = timePassed
+  }
+
+  //Loads a wave of enemies into the spawn queue. 
+  def spawnWave(wave: Wave) = {
+    wave.enemies.foreach( x =>
+    for (i <- 0 until x._2) {
+      queuedEnemies = queuedEnemies :+ Enemy(x._1)
+    })
   }
 }
 
