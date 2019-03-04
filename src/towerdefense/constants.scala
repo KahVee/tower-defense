@@ -10,6 +10,10 @@ package object towerdefense {
   val DefaultEnemySpeed = 5
   val DefaultEnemyHealth = 10
   val EnemySpawnInterval = 0.5
+  
+  val DefaultTowerDamage = 5
+  val DefaultShootingSpeed = 2
+  val DefaultTowerRange = 3
 
   //TEMPORARY
   val DefaultImage = new Image(new FileInputStream("pics/grass.png"), TileSize, TileSize, true, false)

@@ -98,7 +98,7 @@ object GUI extends JFXApp {
             style = "-fx-font-size: 36pt"
             x = (stage.width.value / 2) - 140
             y = 100
-            textAlignment = TextAlignment.CENTER
+            textAlignment = TextAlignment.Center
             fill = new LinearGradient(
               endX = 0,
               stops = Stops(Crimson, OrangeRed))
