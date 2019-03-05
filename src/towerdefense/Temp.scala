@@ -39,7 +39,7 @@ object Temp {
     new Enemy(EnemyImage, (3, -1), grid)
   }
 
-  def makeWave = {
-    new Wave(Vector((makeEnemy, 5)), 2)
+  def makeWave(time: Int) = {
+    new Wave(Vector((makeEnemy, 10)), time)
   }
 }
