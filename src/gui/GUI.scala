@@ -2,21 +2,21 @@ package gui
 
 import scalafx.application.JFXApp
 import scalafx.Includes._
+import javafx.animation.AnimationTimer
+import towerdefense._
+
 import scalafx.scene.image._
 import scalafx.scene._
-import scalafx.animation._
 import scalafx.scene.paint.Color._
 import scalafx.scene.shape._
-import javafx.animation.AnimationTimer
 import scalafx.scene.text._
 import scalafx.scene.canvas._
-import towerdefense._
 import scalafx.scene.control.Button
-import scalafx.scene.SnapshotParameters
 import scalafx.scene.paint.{ Stops, LinearGradient }
 import scalafx.scene.layout.Pane
-import scalafx.geometry.Insets
 import scalafx.scene.effect.DropShadow
+
+
 
 object GUI extends JFXApp {
 
@@ -29,17 +29,22 @@ object GUI extends JFXApp {
 
   var game: Game = null
 
+  //Canvas that the tiles and enemies are drawn on using the graphicsContext
   private val canvas = new Canvas(TileSize * 10, TileSize * 10)
   private val gc = canvas.graphicsContext2D
 
-  private val contentList: List[Node] = List(canvas, pauseButton)
-
+  //All tiles, enemies and other objects that have an image and are drawn on the canvas.
+  //The numbers in the tuple represent the coordinates of the image in "grid space"
   private var drawables = Vector[(Image, Int, Int)]()
+
+  //Full contents of the window: Canvas, buttons, etc
+  private val contentList: List[Node] = List(canvas, pauseButton, ButtonGrid.makeGrid(10, 10))
 
   //Main game loop starting
   start()
   def start() = {
-    game = new Game(Temp.makeGrid, 10, 10, Vector(), Vector(), Vector(Temp.makeWave(0), Temp.makeWave(6)), 1)
+    game = new Game(Temp.makeGrid, 10, 10, Vector(), Vector(), Vector(Temp.makeWave(0), Temp.makeWave(6)), 10)
+    game.start()
 
     stage = new JFXApp.PrimaryStage {
       title.value = "Tower Defense"

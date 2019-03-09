@@ -7,17 +7,29 @@ class Game(private val grid: Grid, var resX: Int, var rexY: Int, var buildableBu
 
   private var timePassed = 0F
 
-  private var builtBuildings = Vector[Building]()
+  var builtBuildings = Vector[Building]()
   private var queuedEnemies = Vector[Enemy]()
   private var lastSpawnedEnemyTime = 0F
 
   def isLost = health <= 0
 
+  //DEBUGGING METHOD FOR NOW
+  def start() = {
+    val farm = new Building(FarmImage, (5,5), DefaultBuildingPrice)
+    val tower = new Tower(TowerImage, (6,5), DefaultBuildingPrice)
+    grid.grid(5)(5) = farm
+    grid.grid(6)(5) = tower
+    builtBuildings = Vector(farm, tower)
+    builtBuildings.foreach(_.initGame(this))
+  }
+  
   def step(dt: Float) = {
     enemies.foreach(_.step(dt))
     health -= enemies.filter(_.reachedTarget).size
-    enemies = enemies.filterNot(_.reachedTarget)
+    enemies = enemies.filter(_.isActive)
 
+    builtBuildings.foreach(_.step(timePassed))
+    
     if (!waves.isEmpty) {
       if (timePassed > waves(0).time) {
         spawnWave(waves(0))
@@ -27,8 +39,6 @@ class Game(private val grid: Grid, var resX: Int, var rexY: Int, var buildableBu
 
     //If there are enemies in the spawn queue, spawn a new one when the appropriate time has passed
     if (!queuedEnemies.isEmpty && timePassed > lastSpawnedEnemyTime + EnemySpawnInterval) spawnEnemyFromQueue
-
-    // DEBUG if (!enemies.isEmpty) enemies.foreach(x => println(x.coords))
 
     timePassed += dt
   }

@@ -1,0 +1,38 @@
+package gui
+
+import scalafx.scene.layout.GridPane
+import scalafx.scene.control.Button
+import scalafx.Includes._
+
+import towerdefense._
+
+// Helper object for GUI containing some methods regarding the grid of buttons that provides the tiles with functionality
+object ButtonGrid {
+  
+  //Makes a grid of buttons of dimensions x and y
+  def makeGrid(x: Int, y: Int) = {
+    new GridPane {
+      
+      for (j <- 0 until y) {
+        for (i <- 0 until x) {
+          
+          add(new Button(/*s"($i, $j)"*/) {
+            prefWidth = TileSize
+            prefHeight = TileSize
+            
+            gridLinesVisible = TileGridLinesVisible
+            
+            //Makes a "highlight" on the tile the mouse is currently hovering on
+            style <== when(hover) choose "-fx-background-color: rgba(0, 0, 0, 0.05); -fx-border-width: 0px;" otherwise "-fx-background-color: rgba(0, 0, 0, 0); -fx-border-width: 0px;"
+            
+            onMousePressed = e => {
+              
+            }
+          }, i, j)
+        }
+      }
+    }
+  }
+  
+  
+}

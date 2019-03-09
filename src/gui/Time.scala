@@ -3,7 +3,7 @@ package gui
 class Time {
 
   //Stores the last 60 frame times to calculate average frames per second
-  var frameTimes = Vector.fill(60)(0D)
+  private var frameTimes = Vector.fill(60)(0D)
   
   //Calculates time difference since last frame as seconds to be used as dt
   private var lastTime = System.nanoTime  
