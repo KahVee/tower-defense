@@ -3,15 +3,19 @@ import scalafx.scene.image._
 
 package object towerdefense {
 
+  //GENERAL
   val Tickrate = 40L
   val TileSize = 64
   val TileGridLinesVisible = false
+  val SideBarPadding = 2
 
-  val EnemySize = 32
+  //ENEMIES
+  val EnemySize = TileSize / 2
   val DefaultEnemySpeed = 1
   val DefaultEnemyHealth = 10
   val EnemySpawnInterval = 0.5
   
+  //BUILDINGS
   val DefaultBuildingPrice = (3, 3)
   val DefaultTowerDamage = 10
   val DefaultShootingSpeed = 1

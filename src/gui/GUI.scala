@@ -11,12 +11,12 @@ import scalafx.scene.paint.Color._
 import scalafx.scene.shape._
 import scalafx.scene.text._
 import scalafx.scene.canvas._
-import scalafx.scene.control.Button
+import scalafx.scene.control._
 import scalafx.scene.paint.{ Stops, LinearGradient }
-import scalafx.scene.layout.Pane
+import scalafx.scene.layout._
 import scalafx.scene.effect.DropShadow
-
-
+import scalafx.geometry.Insets
+import scalafx.scene.effect._
 
 object GUI extends JFXApp {
 
@@ -37,8 +37,8 @@ object GUI extends JFXApp {
   //The numbers in the tuple represent the coordinates of the image in "grid space"
   private var drawables = Vector[(Image, Int, Int)]()
 
-  //Full contents of the window: Canvas, buttons, etc
-  private val contentList: List[Node] = List(canvas, pauseButton, ButtonGrid.makeGrid(10, 10))
+  //Full contents of the window: Canvas, button grid...
+  private val centerContentList: List[Node] = List(canvas, ButtonGrid.makeGrid(10, 10))
 
   //Main game loop starting
   start()
@@ -48,16 +48,41 @@ object GUI extends JFXApp {
 
     stage = new JFXApp.PrimaryStage {
       title.value = "Tower Defense"
-      width = TileSize * 10
+      width = TileSize * 10 + 80
       height = TileSize * 10 + 100
       resizable = false
       onCloseRequest = e => quit()
+
+      //The whole scene of the window
       scene = new Scene {
-        content = contentList
+
+        //Background of the window
+        fill = new LinearGradient(
+          endX = 0,
+          stops = Stops(color(0.23, 0.23, 0.27), color(0.13, 0.13, 0.15)))
+
+        //Window is split into top, bottom, left, center and right using BorderPane
+        content = new BorderPane {
+
+          //Center contains the canvas and button grid
+          center = new Group(centerContentList: _*)
+
+          //Bottom contains the  pause button
+          bottom = new HBox {
+            children = pauseButton
+          }
+
+          //Left contains a vertical stack of building buttons
+          left = new VBox {
+            padding = new javafx.geometry.Insets(SideBarPadding)
+            spacing = SideBarPadding
+            children = for (i <- 0 to 7) yield sidebarButton(PathImage)
+          }
+        }
       }
     }
 
-    updateScene(contentList)
+    updateScene()
     timer.start
     println("started")
   }
@@ -70,7 +95,7 @@ object GUI extends JFXApp {
         game.step(dt)
         drawables = game.getDrawables
 
-        updateScene(contentList)
+        updateScene()
       }
     } else {
       timer.stop()
@@ -79,7 +104,7 @@ object GUI extends JFXApp {
   }
 
   //This method updates the scene, which gets drawn automatically. The parameter is a list of the contents for the scene
-  def updateScene(list: List[Node]) = {
+  def updateScene() = {
     drawables.foreach(x => gc.drawImage(x._1, x._2, x._3))
     gc.fillText(fpsText, 0, 10)
     gc.fillText(healthText, 0, 20)
@@ -90,6 +115,16 @@ object GUI extends JFXApp {
     timer.stop()
   }
 
+  //Gets called when a tile is clicked. Finds out which tile was clicked
+  def mouseClickOnGrid(button: Button) = {
+    val x = (button.layoutX.value / TileSize).round.toInt
+    val y = (button.layoutY.value / TileSize).round.toInt
+    val grid = game.grid.grid
+    if (x < grid.size && y < grid(0).size) {
+      //TODO: ???
+    }
+  }
+
   private def fpsText = "FPS: " + time.fps.round
   private def healthText = "Health: " + game.health
 
@@ -97,7 +132,7 @@ object GUI extends JFXApp {
     new Scene {
       fill = Black
       content = new Pane {
-        children = Seq(
+        children = List(
           new Text {
             text = "GAME OVER"
             style = "-fx-font-size: 36pt"
@@ -126,13 +161,29 @@ object GUI extends JFXApp {
     }
   }
 
-  private def pauseButton = new Button("Pause") {
-    layoutX = 0
-    layoutY = TileSize * 10
+  private def pauseButton = new ToggleButton("Pause") {
     prefWidth = 100
-    prefHeight = 70
+    prefHeight = 64
     onAction = e => {
       isPaused = !isPaused
+    }
+  }
+
+  //A button which only shows an image and has a glow on hover
+  private def sidebarButton(image: Image) = new ToggleButton {
+    
+    val normalGraphic = new ImageView(image)
+    val hoverGraphic = new ImageView(image) {
+      effect = new ColorAdjust {
+        brightness = 0.1
+      }
+    }    
+    style = """-fx-background-color: transparent;
+               -fx-padding: 0;"""
+    graphic <== when(hover) choose hoverGraphic otherwise normalGraphic
+    
+    onAction = e => {
+      //TODO: Make the button choose a tower to be built
     }
   }
 }
