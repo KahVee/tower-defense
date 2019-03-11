@@ -8,15 +8,11 @@ import scalafx.animation._
 import scalafx.scene.paint.Color._
 import scalafx.scene.shape._
 import javafx.animation.AnimationTimer
-import scalafx.scene.text._
+import scalafx.scene.text.Text
 import scalafx.scene.canvas._
 import towerdefense._
 import scalafx.scene.control.Button
 import scalafx.scene.SnapshotParameters
-import scalafx.scene.paint.{ Stops, LinearGradient }
-import scalafx.scene.layout.Pane
-import scalafx.geometry.Insets
-import scalafx.scene.effect.DropShadow
 
 object GUI extends JFXApp {
 
@@ -36,11 +32,22 @@ object GUI extends JFXApp {
 
   private var drawables = Vector[(Image, Int, Int)]()
 
+  private def pauseButton = new Button("Pause") {
+    layoutX = 0
+    layoutY = TileSize * 10
+    prefWidth = 100
+    prefHeight = 70
+    onAction = e => {
+      isPaused = !isPaused
+    }
+  }
+
   //Main game loop starting
   start()
   def start() = {
-    game = new Game(Temp.makeGrid, 10, 10, Vector(), Vector(), Vector(Temp.makeWave(0), Temp.makeWave(6)), 1)
-
+    
+    game = new Game(Temp.makeGrid, 10, 10, Vector(), Vector(), Vector(Temp.makeWave(1)), 10)
+    
     stage = new JFXApp.PrimaryStage {
       title.value = "Tower Defense"
       width = TileSize * 10
@@ -51,25 +58,20 @@ object GUI extends JFXApp {
         content = contentList
       }
     }
-
+    
     updateScene(contentList)
     timer.start
     println("started")
   }
 
   //Main loop, gets called by AnimationTimer
-  def update(): Unit = {
-    if (!game.isLost) {
-      dt = time.deltaTime
-      if (!isPaused) {
-        game.step(dt)
-        drawables = game.getDrawables
+  def update() = {
+    dt = time.deltaTime
+    if (!isPaused) {
+      game.step(dt)
+      drawables = game.getDrawables
 
-        updateScene(contentList)
-      }
-    } else {
-      timer.stop()
-      stage.scene = losingScene
+      updateScene(contentList)
     }
   }
 
@@ -88,46 +90,4 @@ object GUI extends JFXApp {
   private def fpsText = "FPS: " + time.fps.round
   private def healthText = "Health: " + game.health
 
-  private def losingScene = {
-    new Scene {
-      fill = Black
-      content = new Pane {
-        children = Seq(
-          new Text {
-            text = "GAME OVER"
-            style = "-fx-font-size: 36pt"
-            x = (stage.width.value / 2) - 140
-            y = 100
-            textAlignment = TextAlignment.Center
-            fill = new LinearGradient(
-              endX = 0,
-              stops = Stops(Crimson, OrangeRed))
-            effect = new DropShadow {
-              color = Red
-              radius = 30
-              spread = 0.2
-            }
-          },
-          new Button("Play Again") {
-            layoutX = (stage.width.value / 2) - 80
-            layoutY = 150
-            prefWidth = 150
-            prefHeight = 50
-            onAction = e => {
-              start()
-            }
-          })
-      }
-    }
-  }
-
-  private def pauseButton = new Button("Pause") {
-    layoutX = 0
-    layoutY = TileSize * 10
-    prefWidth = 100
-    prefHeight = 70
-    onAction = e => {
-      isPaused = !isPaused
-    }
-  }
 }
