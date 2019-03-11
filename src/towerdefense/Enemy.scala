@@ -24,6 +24,9 @@ class Enemy(var image: Image, var coords: (Float, Float), private val grid: Grid
   //Moves the enemy forward by one step. Length of the step is determined by the speed of the enemy and dt.
   //Also acts as simple pathfinding, as in checks if the next tile is accessible, and if not, rotates the enemy.
   def step(dt: Float) = {
+    if(isDead) {
+      isActive = false
+    }
     if (isActive) {
 
       //Checks, which tile the enemy is currently on
@@ -32,6 +35,7 @@ class Enemy(var image: Image, var coords: (Float, Float), private val grid: Grid
       var nextTile = grid.nextTile(direction, (coords._1.toInt, coords._2.toInt))
       if (nextTile.isEmpty) {
         reachedTarget = true
+        isActive = false
       } else {
 
       //Checks if next tile forward is a path or if it was the tile the enemy came from and rotates if necessary

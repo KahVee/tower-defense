@@ -3,7 +3,6 @@ package towerdefense
 //Testing and debugging methods
 object Temp {
 
-  //REMOVE LATER
   var grid: Grid = null
   def makeGrid = {
     val x = 10
