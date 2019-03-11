@@ -1,0 +1,23 @@
+11.3
+Toteutettu Game-luokka, jonka toiminnallisuus on jo hyvällä tasolla: se luo vihollisia ja pitää niistä kirjaa.
+Toteutettu Enemy-luokka, joka on käytännössä valmis: viholliset liikkuvat, kun step()-metodia kutsutaan, ja löytävät maaliinsa yksinkertaisessa kentässä.
+Wave-luokassa ei ole toiminnallisuutta, ja on kyseenalaista tarvitaanko sitä varten luokkaa laisinkaan.
+Grid-luokkaan toteutettu apumetodit nextTile ja currentTile, jotka selvittävät vihollisen koordinaattien perusteella halutun ruudun.
+Direction-luokka ja sen ilmentymät Left, Right, Up ja Down auttavat apumetodeineen suuntien muutoksissa ja liikkeen laskemisessa.
+Toteutettu Tower-luokka, joka vaatii vielä kehitystä. Tällä hetkellä tornit ampuvat lähintä vihollista. Käyttäjällä ei ole vielä tapaa selvittää tornien kohdetta tai niiden vahinkoa, tms.
+Toteutettu GUI-luokka, ja sen apuluokat Time ja ButtonGrid. Pelin käynnistysolio GUI piirtää ikkunan ja päivittää sen grafiikoita apunaan Gamen getDrawables-metodi.
+
+Koska tavoitteenani on tehdä FileParser, joka lukee tekstitiedostosta erilaisten kenttien konfiguraatiot, on erilaisia luokkia ollut hieman haastava testata.
+Testauksen ja debuggauksen helpottamiseksi tein Temp-olion apumetodit kentän, vihollisten ja aaltojen luomiseen. Niiden avulla ohjelmalla on jotain piirrettävää ruudulle,
+ja ongelmia voi huomata visuaalisesti.
+
+Eräs hankala ongelma oli vihollisten aloittaminen kentän ulkopuolelta, ja niiden matkan päättyminen kentän ulkopuolelle. Osa ongelmaa ratkesi käyttämällä Optioneita
+lastTilen ja CurrentTilen säilömiseen, mutta kentän ulkopuolelle asti jatkaminen ennen "maaliin pääsyä" on vielä työn alla.
+Toinen ongelma oli kuvien importtaaminen projektiin: ScalaFX:n ImageView-luokka ei jostain syystä tue pikselöityjen kuvien skaalausta, vaan käyttää anti-aliasingia ronskilla kädellä.
+Kuvia täytyy siis käyttää raa'assa Image-muodossa.
+Gitin kanssa on ollut hieman ongelmia unohtuneiden pushien ja vääränlaisten classpathien muodossa. Nyt näyttää siltä, että ongelmat on saatu hoidettua.
+
+Työmäärä tähän mennessä on ollut noin 25h. Olen suurin piirtein aikataulussa, ja suunnittelemani aikataulu on ollut melko paikkansapitävä, vaikka ScalaFX:n
+opettelu onkin vienyt reilusti enemmän aikaa, kuin kuvittelin (materiaali on melko haastava löytää, ja JavaFX:n vastaavien ohjeiden soveltaminen ei aina toimi intuitiivisesti).
+Aikataulussa seuraavaksi on vielä rakennusten logiikan toteutus, ja niiden rakentaminen, jotka molemmat ovat jo melko hyvässä vaiheessa. Kun rakennuslogiikka on valmis,
+voin aloittaa tiedostonlukijan toteuttamisen.
