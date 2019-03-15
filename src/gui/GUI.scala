@@ -33,10 +33,6 @@ object GUI extends JFXApp {
   private val canvas = new Canvas(TileSize * 10, TileSize * 10)
   private val gc = canvas.graphicsContext2D
 
-  //All tiles, enemies and other objects that have an image and are drawn on the canvas.
-  //The numbers in the tuple represent the coordinates of the image in "grid space"
-  private var drawables = Vector[(Image, Int, Int)]()
-
   //Full contents of the window: Canvas, button grid...
   private val centerContentList: List[Node] = List(canvas, ButtonGrid.makeGrid(10, 10))
 
@@ -93,7 +89,6 @@ object GUI extends JFXApp {
       dt = time.deltaTime
       if (!isPaused) {
         game.step(dt)
-        drawables = game.getDrawables
 
         updateScene()
       }
@@ -105,7 +100,8 @@ object GUI extends JFXApp {
 
   //This method updates the scene, which gets drawn automatically. The parameter is a list of the contents for the scene
   def updateScene() = {
-    drawables.foreach(x => gc.drawImage(x._1, x._2, x._3))
+    //getDrawables returns a vector of images, each of which has its coordinates stored in the tuple's second and third slot
+    game.getDrawables.foreach(x => gc.drawImage(x._1, x._2, x._3))
     gc.fillText(fpsText, 0, 10)
     gc.fillText(healthText, 0, 20)
   }
