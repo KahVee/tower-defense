@@ -39,6 +39,6 @@ object Temp {
   }
 
   def makeWave(time: Int) = {
-    new Wave(Vector((makeEnemy, 10)), time)
+    new Wave(Vector((makeEnemy, 100)), time)
   }
 }

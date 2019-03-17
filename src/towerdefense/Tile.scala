@@ -3,15 +3,19 @@ package towerdefense
 import scalafx.scene.image._
 
 class Tile(val image: Image, val coords: (Int, Int)) {
+  val buildable = true
   override def toString = "tile at " + coords.toString
 }
 
 class TraversableTile(image: Image, coords: (Int, Int)) extends Tile(image, coords) {
+
   override def toString = "path at " + coords.toString
 }
 
+
 class Building(image: Image, coords: (Int, Int), val price: (Int, Int)) extends Tile(image, coords) {
 
+  override val buildable = false
   var isActive = false
   protected var game = gui.GUI.game
 
@@ -22,18 +26,10 @@ class Building(image: Image, coords: (Int, Int), val price: (Int, Int)) extends 
   override def toString = "building at " + coords.toString
 }
 
-object Building {
-  def apply(other:Building) = {
-    val building = new Building(other.image, other.coords, other.price)
-    building
-  }
-}
 
-class Tower(image: Image, coords: (Int, Int), price: (Int, Int)) extends Building(image, coords, price) {
-  
-  private var damage = DefaultTowerDamage
-  private var speed = DefaultShootingSpeed
-  private var range = DefaultTowerRange
+class Tower(image: Image, coords: (Int, Int), price: (Int, Int), val damage: Int = DefaultTowerDamage, val speed: Float = DefaultShootingSpeed, val range: Int = DefaultTowerRange) extends Building(image, coords, price) {
+
+  override val buildable = false
 
   private var target: Option[Enemy] = None
   private var lastShotTime = 0F
@@ -60,13 +56,16 @@ class Tower(image: Image, coords: (Int, Int), price: (Int, Int)) extends Buildin
   override def toString = "tower at " + coords.toString
 }
 
-//helper object to make a new Tower with copied parameters from another
-object Tower {
-  def apply(other: Tower) = {
-    val tower = new Tower(other.image, other.coords, other.price)
-    tower.damage = other.damage
-    tower.speed = other.speed
-    tower.range = other.range
-    tower
+//Helper object to copy "sleeping" reference buildings into new active ones
+object Building {
+  def apply(other: Building, coords: (Int, Int)) = {
+    if (other.isInstanceOf[Tower]) {
+      val tower = other.asInstanceOf[Tower]
+      val newTower = new Tower(tower.image, coords, tower.price, tower.damage)
+      newTower
+    } else {
+      val building = new Building(other.image, coords, other.price)
+      building
+    }
   }
 }

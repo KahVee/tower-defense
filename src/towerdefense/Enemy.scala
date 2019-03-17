@@ -56,7 +56,7 @@ class Enemy(var image: Image, var coords: (Float, Float), private val grid: Grid
     }
   }
 
-  //TODO: Make an actual version of this instead of just this proof-of-concept
+  //Finds the current tile, and if it's changed from the previous step, updates the lastTile and currentTile variables
   def updateCurrentTile = {
     val current = grid.currentTile(coords)
     if (current != currentTile) {

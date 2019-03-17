@@ -20,21 +20,25 @@ import scalafx.scene.effect._
 
 object GUI extends JFXApp {
 
+  var game: Game = null
+
   val time = new Time
   var dt = time.deltaTime
+  var isPaused = false
+
   val timer = new AnimationTimer {
     override def handle(now: Long) = update()
   }
-  var isPaused = false
-
-  var game: Game = null
 
   //Canvas that the tiles and enemies are drawn on using the graphicsContext
   private val canvas = new Canvas(TileSize * 10, TileSize * 10)
   private val gc = canvas.graphicsContext2D
 
   //Full contents of the window: Canvas, button grid...
-  private val centerContentList: List[Node] = List(canvas, ButtonGrid.makeGrid(10, 10))
+  private val centerContentVector: Vector[Node] = Vector(canvas, ButtonGrid.makeGrid(10, 10))
+  private var sidebarButtons = Vector[Button]()
+
+  private var selectedBuilding: Option[Building] = None
 
   //Main game loop starting
   start()
@@ -61,9 +65,9 @@ object GUI extends JFXApp {
         content = new BorderPane {
 
           //Center contains the canvas and button grid
-          center = new Group(centerContentList: _*)
+          center = new Group(centerContentVector: _*)
 
-          //Bottom contains the  pause button
+          //Bottom contains the pause button
           bottom = new HBox {
             children = pauseButton
           }
@@ -72,7 +76,7 @@ object GUI extends JFXApp {
           left = new VBox {
             padding = new javafx.geometry.Insets(SideBarPadding)
             spacing = SideBarPadding
-            children = for (i <- 0 to 7) yield sidebarButton(PathImage)
+            children = for (building <- game.buildableBuildings) yield sidebarButton(building)
           }
         }
       }
@@ -85,11 +89,12 @@ object GUI extends JFXApp {
 
   //Main loop, gets called by AnimationTimer
   def update(): Unit = {
+
     if (!game.isLost) {
       dt = time.deltaTime
+
       if (!isPaused) {
         game.step(dt)
-
         updateScene()
       }
     } else {
@@ -104,6 +109,7 @@ object GUI extends JFXApp {
     game.getDrawables.foreach(x => gc.drawImage(x._1, x._2, x._3))
     gc.fillText(fpsText, 0, 10)
     gc.fillText(healthText, 0, 20)
+    gc.fillText(selectedBuilding.toString, 200, 200)
   }
 
   //Application exit method, gets called when main window is closed
@@ -111,13 +117,33 @@ object GUI extends JFXApp {
     timer.stop()
   }
 
-  //Gets called when a tile is clicked. Finds out which tile was clicked
-  def mouseClickOnGrid(button: Button) = {
+  def updateSelectedBuilding(building: Option[Building]) = {
+    selectedBuilding = building
+  }
+
+  //Returns the "game space" coordinates of a button
+  def getButtonCoordinates(button: Button) = {
     val x = (button.layoutX.value / TileSize).round.toInt
     val y = (button.layoutY.value / TileSize).round.toInt
+    (x, y)
+  }
+
+  //Gets called when a tile is clicked. Finds out which tile was clicked
+  def mouseClickOnGrid(button: Button) = {
     val grid = game.grid.grid
-    if (x < grid.size && y < grid(0).size) {
-      //TODO: ???
+    val coords = getButtonCoordinates(button)
+
+    if (coords._1 < grid.size && coords._2 < grid(0).size) {
+      val clickedTile = grid(coords._1)(coords._2)
+
+      if (clickedTile.buildable) {
+        val newBuilding = Building(selectedBuilding.get, coords)
+        grid(coords._1)(coords._2) = newBuilding
+        game.builtBuildings = game.builtBuildings :+ newBuilding
+        newBuilding.isActive = true
+        updateScene()
+      }
+      updateSelectedBuilding(None)
     }
   }
 
@@ -166,20 +192,33 @@ object GUI extends JFXApp {
   }
 
   //A button which only shows an image and has a glow on hover
-  private def sidebarButton(image: Image) = new ToggleButton {
-    
-    val normalGraphic = new ImageView(image)
-    val hoverGraphic = new ImageView(image) {
-      effect = new ColorAdjust {
-        brightness = 0.1
+  private def sidebarButton(building: Building) = {
+    val tg = new ToggleGroup()
+    new ToggleButton {
+      val number = sidebarButtons.size
+      toggleGroup = tg
+      val normalGraphic = new ImageView(building.image) {
+        effect = new ColorAdjust {
+          saturation = -0.3
+          brightness = -0.2
+        }
       }
-    }    
-    style = """-fx-background-color: transparent;
+      val highlightGraphic = new ImageView(building.image) {
+        effect = new ColorAdjust {
+          brightness = 0.1
+        }
+      }
+      style = """-fx-background-color: transparent;
                -fx-padding: 0;"""
-    graphic <== when(hover) choose hoverGraphic otherwise normalGraphic
-    
-    onAction = e => {
-      //TODO: Make the button choose a tower to be built
+      graphic <== when(focused) choose highlightGraphic otherwise normalGraphic
+
+      onAction = e => {
+        if (!focused.value) {
+          updateSelectedBuilding(None)
+        } else {
+          updateSelectedBuilding(Some(building))
+        }
+      }
     }
   }
 }

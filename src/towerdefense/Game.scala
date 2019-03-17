@@ -19,7 +19,7 @@ class Game(val grid: Grid, var resX: Int, var rexY: Int, var buildableBuildings:
     val tower = new Tower(TowerImage, (6,5), DefaultBuildingPrice)
     grid.grid(5)(5) = farm
     grid.grid(6)(5) = tower
-    buildableBuildings = Vector(Building(farm), Tower(tower))
+    buildableBuildings = Vector(Building(farm, (5, 5)), Building(tower, (6,5)))
     builtBuildings = Vector(farm, tower)
     builtBuildings.foreach(_.isActive = true)
   }
@@ -38,6 +38,8 @@ class Game(val grid: Grid, var resX: Int, var rexY: Int, var buildableBuildings:
       }
     }
 
+    println(builtBuildings.mkString(", "))
+    
     //If there are enemies in the spawn queue, spawn a new one when the appropriate time has passed
     if (!queuedEnemies.isEmpty && timePassed > lastSpawnedEnemyTime + EnemySpawnInterval) spawnEnemyFromQueue
 
