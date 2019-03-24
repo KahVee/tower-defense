@@ -7,7 +7,8 @@ package object towerdefense {
   val Tickrate = 40L
   val TileSize = 64
   val TileGridLinesVisible = false
-  val SideBarPadding = 2
+  val SidebarPadding = 2
+  val BottomPadding = 10
 
   //ENEMIES
   val EnemySize = TileSize / 2

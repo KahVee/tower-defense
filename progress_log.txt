@@ -21,3 +21,15 @@ Työmäärä tähän mennessä on ollut noin 25h. Olen suurin piirtein aikataulu
 opettelu onkin vienyt reilusti enemmän aikaa, kuin kuvittelin (materiaali on melko haastava löytää, ja JavaFX:n vastaavien ohjeiden soveltaminen ei aina toimi intuitiivisesti).
 Aikataulussa seuraavaksi on vielä rakennusten logiikan toteutus, ja niiden rakentaminen, jotka molemmat ovat jo melko hyvässä vaiheessa. Kun rakennuslogiikka on valmis,
 voin aloittaa tiedostonlukijan toteuttamisen.
+
+24.3.
+Lisätty GUI-luokkaan rakennusten rakentaminen, ja ehtojen tarkistus. UI:ta muokattu, ja sivupalkki rakennuksille lisätty. Game-luokassa rakentamisen hoitaa uusi buildBuilding-metodi.
+
+Testauksesta suurin osa on tapahtunut println-komentojen taktisella sijoittelulla, ja tähän mennessä projekti vaikuttaisi toimivan halutusti.
+
+Resurssitekstin näyttäminen reaaliaikaisesti on hiukan ongelmallista: pelkän tekstin päivitys tuo koko ikkunan etualalle. Tätä ei tapahdu FPS- ja Health-teksteissä, koska ne piirretään Canvas-
+olion GraphicsContext2D-osalla, joka toimii eri lailla kuin "puhdas" teksti. ScalaFX/JavaFX sisältää binding-ominaisuuden, jolla voi kuunnella muita tapahtumia (kuten hiiren liikettä), mutta
+en ole vielä selvittänyt, voiko ominaisutta käyttää tekstin sisällön muuttamiseen.
+
+Työmäärää viime raportin jälkeen on melko vähäinen: noin 8 tuntia. Seuraava vaihe lienee tiedostonlukijan toteutus, joka on viimeinen suuri ominaisuus. Olen ehkä hieman jäljessä
+aikataulusta, mutta kunhan muut kiireet helpottavat, saanen helposti aikataulun kiinni.

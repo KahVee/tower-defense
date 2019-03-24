@@ -18,7 +18,7 @@ object ButtonGrid {
         i <- 0 until x
       ) {
 
-        add(new Button( /*s"($i, $j)"*/ ) {
+        add(new Button( s"($i, $j)" ) {
           prefWidth = TileSize
           prefHeight = TileSize
 

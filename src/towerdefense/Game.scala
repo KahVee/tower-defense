@@ -3,7 +3,7 @@ package towerdefense
 import scala.collection.mutable.Buffer
 import scalafx.scene.image._
 
-class Game(val grid: Grid, var resX: Int, var rexY: Int, var buildableBuildings: Vector[Building], var enemies: Vector[Enemy], private var waves: Vector[Wave], var health: Int) {
+class Game(val grid: Grid, var resX: Int, var resY: Int, var buildableBuildings: Vector[Building], var enemies: Vector[Enemy], private var waves: Vector[Wave], var health: Int) {
 
   private var timePassed = 0F
 
@@ -19,7 +19,7 @@ class Game(val grid: Grid, var resX: Int, var rexY: Int, var buildableBuildings:
     val tower = new Tower(TowerImage, (6,5), DefaultBuildingPrice)
     grid.grid(5)(5) = farm
     grid.grid(6)(5) = tower
-    buildableBuildings = Vector(Building(farm, (5, 5)), Building(tower, (6,5)))
+    buildableBuildings = Vector(Building(farm, (0, 0)), Building(tower, (0,0)))
     builtBuildings = Vector(farm, tower)
     builtBuildings.foreach(_.isActive = true)
   }
@@ -37,8 +37,6 @@ class Game(val grid: Grid, var resX: Int, var rexY: Int, var buildableBuildings:
         waves = waves.tail
       }
     }
-
-    println(builtBuildings.mkString(", "))
     
     //If there are enemies in the spawn queue, spawn a new one when the appropriate time has passed
     if (!queuedEnemies.isEmpty && timePassed > lastSpawnedEnemyTime + EnemySpawnInterval) spawnEnemyFromQueue
@@ -80,5 +78,16 @@ class Game(val grid: Grid, var resX: Int, var rexY: Int, var buildableBuildings:
       queuedEnemies = queuedEnemies :+ Enemy(x._1)
     })
   }
+  
+  //Builds a given building in the given coordinates and activates it. Updates the resources, grid and list of built buildings.
+  def buildBuilding(building: Building, coords: (Int, Int)) = {
+    val newBuilding = Building(building, coords)
+    resX -= newBuilding.price._1
+    resY -= newBuilding.price._2
+    grid.grid(coords._1)(coords._2) = newBuilding
+    builtBuildings = builtBuildings :+ newBuilding
+    newBuilding.isActive = true
+  }
+
 }
 

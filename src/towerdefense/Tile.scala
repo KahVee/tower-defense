@@ -8,10 +8,9 @@ class Tile(val image: Image, val coords: (Int, Int)) {
 }
 
 class TraversableTile(image: Image, coords: (Int, Int)) extends Tile(image, coords) {
-
+  override val buildable = false
   override def toString = "path at " + coords.toString
 }
-
 
 class Building(image: Image, coords: (Int, Int), val price: (Int, Int)) extends Tile(image, coords) {
 
@@ -25,7 +24,6 @@ class Building(image: Image, coords: (Int, Int), val price: (Int, Int)) extends 
 
   override def toString = "building at " + coords.toString
 }
-
 
 class Tower(image: Image, coords: (Int, Int), price: (Int, Int), val damage: Int = DefaultTowerDamage, val speed: Float = DefaultShootingSpeed, val range: Int = DefaultTowerRange) extends Building(image, coords, price) {
 

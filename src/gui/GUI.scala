@@ -4,9 +4,11 @@ import scalafx.application.JFXApp
 import scalafx.Includes._
 import javafx.animation.AnimationTimer
 import towerdefense._
+import scalafx.beans.property._
 
 import scalafx.scene.image._
 import scalafx.scene._
+import scalafx.scene.input.MouseButton
 import scalafx.scene.paint.Color._
 import scalafx.scene.shape._
 import scalafx.scene.text._
@@ -14,9 +16,9 @@ import scalafx.scene.canvas._
 import scalafx.scene.control._
 import scalafx.scene.paint.{ Stops, LinearGradient }
 import scalafx.scene.layout._
-import scalafx.scene.effect.DropShadow
-import scalafx.geometry.Insets
 import scalafx.scene.effect._
+import scalafx.scene.input.KeyCode
+import javafx.beans.value.ObservableStringValue
 
 object GUI extends JFXApp {
 
@@ -38,23 +40,35 @@ object GUI extends JFXApp {
   private val centerContentVector: Vector[Node] = Vector(canvas, ButtonGrid.makeGrid(10, 10))
   private var sidebarButtons = Vector[Button]()
 
+  //Stores an inactive version of a building the player has selected. If the player clicks a tile and building is possible, this building will be built.
   private var selectedBuilding: Option[Building] = None
 
-  //Main game loop starting
+  //Main game loop starting, creates the game, window and the layout within the window
   start()
   def start() = {
     game = new Game(Temp.makeGrid, 10, 10, Vector(), Vector(), Vector(Temp.makeWave(0), Temp.makeWave(6)), 10)
+    
     game.start()
 
     stage = new JFXApp.PrimaryStage {
       title.value = "Tower Defense"
-      width = TileSize * 10 + 80
-      height = TileSize * 10 + 100
+      width = TileSize * game.grid.grid.size + 80
+      height = TileSize * game.grid.grid(0).size + 100
       resizable = false
       onCloseRequest = e => quit()
 
       //The whole scene of the window
       scene = new Scene {
+
+        //Discards selected building and "clears" the highlight effect when mouse is clicked outside any button
+        def discardSelectedBuilding() = {
+          selectedBuilding = None
+          canvas.requestFocus()
+        }
+
+        onMousePressed = e => {
+          discardSelectedBuilding()
+        }
 
         //Background of the window
         fill = new LinearGradient(
@@ -69,13 +83,17 @@ object GUI extends JFXApp {
 
           //Bottom contains the pause button
           bottom = new HBox {
-            children = pauseButton
+            spacing = BottomPadding
+            //TODO: Fix the resourceText, currently it doesn't update properly
+            children = Vector(pauseButton, new VBox {
+              children = resourceText
+            })
           }
 
           //Left contains a vertical stack of building buttons
           left = new VBox {
-            padding = new javafx.geometry.Insets(SideBarPadding)
-            spacing = SideBarPadding
+            padding = new javafx.geometry.Insets(SidebarPadding)
+            spacing = SidebarPadding
             children = for (building <- game.buildableBuildings) yield sidebarButton(building)
           }
         }
@@ -107,9 +125,8 @@ object GUI extends JFXApp {
   def updateScene() = {
     //getDrawables returns a vector of images, each of which has its coordinates stored in the tuple's second and third slot
     game.getDrawables.foreach(x => gc.drawImage(x._1, x._2, x._3))
-    gc.fillText(fpsText, 0, 10)
-    gc.fillText(healthText, 0, 20)
-    gc.fillText(selectedBuilding.toString, 200, 200)
+    gc.fillText(fpsString, 0, 10)
+    gc.fillText(healthString, 0, 20)
   }
 
   //Application exit method, gets called when main window is closed
@@ -133,23 +150,25 @@ object GUI extends JFXApp {
     val grid = game.grid.grid
     val coords = getButtonCoordinates(button)
 
-    if (coords._1 < grid.size && coords._2 < grid(0).size) {
-      val clickedTile = grid(coords._1)(coords._2)
-
-      if (clickedTile.buildable) {
-        val newBuilding = Building(selectedBuilding.get, coords)
-        grid(coords._1)(coords._2) = newBuilding
-        game.builtBuildings = game.builtBuildings :+ newBuilding
-        newBuilding.isActive = true
-        updateScene()
+    //This if-block checks if all the conditions for building to be built are checked, i.e. there is a building selected, the clicked tile is empty, and there is enough resources
+    if (selectedBuilding.isDefined) {
+      val building = selectedBuilding.get
+      if (coords._1 < grid.size && coords._2 < grid(0).size) {
+        if (grid(coords._1)(coords._2).buildable) {
+          if (game.resX >= building.price._1 && game.resY >= building.price._2) {
+            game.buildBuilding(building, coords)
+            updateScene()
+          }
+        }
       }
-      updateSelectedBuilding(None)
     }
+    updateSelectedBuilding(None)
   }
 
-  private def fpsText = "FPS: " + time.fps.round
-  private def healthText = "Health: " + game.health
-
+  private def fpsString = "FPS: " + time.fps.round
+  private def healthString = "Health: " + game.health
+  private def resourceText = new Text ("X: " + game.resX + "\nY: " + game.resY)
+  
   private def losingScene = {
     new Scene {
       fill = Black
@@ -186,6 +205,7 @@ object GUI extends JFXApp {
   private def pauseButton = new ToggleButton("Pause") {
     prefWidth = 100
     prefHeight = 64
+    style = "-fx-padding: 0;"
     onAction = e => {
       isPaused = !isPaused
     }
@@ -193,10 +213,8 @@ object GUI extends JFXApp {
 
   //A button which only shows an image and has a glow on hover
   private def sidebarButton(building: Building) = {
-    val tg = new ToggleGroup()
     new ToggleButton {
       val number = sidebarButtons.size
-      toggleGroup = tg
       val normalGraphic = new ImageView(building.image) {
         effect = new ColorAdjust {
           saturation = -0.3
@@ -204,12 +222,12 @@ object GUI extends JFXApp {
         }
       }
       val highlightGraphic = new ImageView(building.image) {
-        effect = new ColorAdjust {
-          brightness = 0.1
+        effect = new DropShadow {
+          color = White
         }
       }
       style = """-fx-background-color: transparent;
-               -fx-padding: 0;"""
+                 -fx-padding: 0;"""
       graphic <== when(focused) choose highlightGraphic otherwise normalGraphic
 
       onAction = e => {
