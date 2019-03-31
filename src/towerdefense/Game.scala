@@ -45,6 +45,7 @@ class Game(val grid: Grid, var resX: Int, var resY: Int, var buildableBuildings:
   }
 
   //Returns all the tiles and enemies of the game in a Vector
+  //TODO: store the "canvas space" coordinates somewhere so that this method won't have to calculate them every frame
   def getDrawables: Vector[(Image, Int, Int)] = {
     //Converts a 2D tile array to Vector[Image, Int, Int)], where the Ints are X and Y coords of the image
     def tileArrayToVector(array: Array[Array[towerdefense.Tile]]) = {

@@ -18,7 +18,8 @@ object ButtonGrid {
         i <- 0 until x
       ) {
 
-        add(new Button( s"($i, $j)" ) {
+        //Drawing the button names drops fps by over 60%
+        add(new Button( /*s"($i, $j)"*/ ) {
           prefWidth = TileSize
           prefHeight = TileSize
 

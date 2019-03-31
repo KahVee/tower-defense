@@ -32,6 +32,7 @@ class Tower(image: Image, coords: (Int, Int), price: (Int, Int), val damage: Int
   private var target: Option[Enemy] = None
   private var lastShotTime = 0F
 
+  //TODO: (Maybe at some point) make a more accurate way of checking when to shoot, this method works well enough for slow towers, but not for fast ones.
   override def step(now: Float) = {
     if (isActive) {
       target = findClosestTarget(game.enemies)

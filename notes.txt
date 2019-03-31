@@ -1,0 +1,5 @@
+var Vector vs val Buffer
+
+Miten tiedostosta lukiessa kannattaa luoda olioita, joilla on yläluokkia ja yksityisiä muuttujia?
+(Tile->Building->Tower) (myös Enemy jossain määrin)
+Tällä hetkellä Towerin muuttujat eivät private, koska luominen tapahtuu yhdellä Building-apuoliolla.
