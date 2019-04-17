@@ -3,7 +3,7 @@ package towerdefense
 import scala.collection.mutable.Buffer
 import scalafx.scene.image._
 
-class Game(val grid: Grid, var resX: Int, var resY: Int, var buildableBuildings: Vector[Building], var enemies: Vector[Enemy], private var waves: Vector[Wave], var health: Int) {
+class Game(val name: String, val grid: Grid, var resX: Int, var resY: Int, var buildableBuildings: Vector[Building], var enemies: Vector[Enemy], private var waves: Vector[Wave], var health: Int) {
 
   private var timePassed = 0F
 
@@ -15,8 +15,8 @@ class Game(val grid: Grid, var resX: Int, var resY: Int, var buildableBuildings:
 
   //DEBUGGING METHOD FOR NOW
   def start() = {
-    val farm = new Building(FarmImage, (5,5), DefaultBuildingPrice)
-    val tower = new Tower(TowerImage, (6,5), DefaultBuildingPrice)
+    val farm = new Building("A", FarmImage, (5,5), DefaultBuildingPrice)
+    val tower = new Tower("B", TowerImage, (6,5), DefaultBuildingPrice)
     grid.grid(5)(5) = farm
     grid.grid(6)(5) = tower
     buildableBuildings = Vector(Building(farm, (0, 0)), Building(tower, (0,0)))

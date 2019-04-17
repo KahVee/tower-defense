@@ -1,0 +1,47 @@
+TODE 1.0 MAP FILE
+//Comment
+
+//Whitespace allowed
+
+METADATA
+	//Default values:
+	Name: Map
+	StartResources: X20 Y20
+	Difficulty: 3
+	Size: 10x10
+ENDMETADATA
+
+TILES
+	TILE: EMPTY
+		ID: 00
+		PIC: grass.png
+		TYPE: Empty
+	TILE: PATH
+		ID: 01
+		PIC: path.png
+		TYPE: Traversable
+	TILE: ENTRY
+		ID: 02
+		PIC: entry.png
+		TYPE: Traversable
+		//ENTRYDIRECTION: left
+	TILE: EXIT
+		ID: 03
+		PIC: exit.png
+		TYPE: Traversable
+		//EXITDIRECTION: right
+	TILE: TOWER1
+		ID: 04
+		PIC: tower.png
+		TYPE: Tower
+		Price: X10 Y5
+		Damage: 2
+		Reload: 3
+	TILE: BUILDING1
+		ID: 05
+		PIC: farm.png
+		TYPE: Building
+		Price: X5 Y20
+ENDTILES
+
+END
