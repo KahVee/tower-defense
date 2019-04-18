@@ -21,6 +21,16 @@ class FileParser {
 
     //TILES
     val tiles = Buffer[Tile]()
+    var entryTile: Option[Tile] = None
+    var exitTile: Option[Tile] = None
+
+    //MAP
+    //idGrid is a 2d array of ids, grid is the game grid itself
+    val idGrid = Buffer[Array[Int]]()
+    var grid: Option[Grid] = None
+
+    //ENEMIES
+    val enemies = Buffer[Enemy]()
 
     val fileReader = try {
       new FileReader(new File(filepath))
@@ -62,9 +72,7 @@ class FileParser {
           case curLine if curLine.startsWith("map")      => readMapData()
           case curLine if curLine.startsWith("enemies")  => readEnemyData()
           case curLine if curLine.startsWith("waves")    => readWaveData()
-          case curLine if curLine.startsWith("//")       => ()
           case curLine if curLine.startsWith("end")      => endReached = true
-          case _                                         => throw new MapFileException("Error reading file at " + rawLine)
         }
       }
 
@@ -72,12 +80,28 @@ class FileParser {
       def readNextLine(): Unit = {
         rawLine = lineReader.readLine
         curLine = rawLine.trim.toLowerCase
-        if (curLine == "") readNextLine()
+        println(rawLine)
+        if (curLine == "" || curLine.startsWith("//")) readNextLine()
       }
 
       //Splits a string at every colon, and takes the second result
       def split(string: String) = {
         string.split(':')(1).trim
+      }
+
+      //Returns an image from maps folder with "name"
+      def loadImage(name: String) = {
+        try {
+          new Image(new FileInputStream("pics/" + name), TileSize, TileSize, true, false)
+        } catch {
+          case e: FileNotFoundException =>
+            throw new MapFileException(s"Error finding $name")
+        }
+      }
+      
+      //TODO: implement
+      def createGrid() = {
+        
       }
 
       //Reads the METADATA block until ENDMETADATA is reached
@@ -90,7 +114,6 @@ class FileParser {
           case curLine if curLine.startsWith("startresources") => readResources()
           case curLine if curLine.startsWith("difficulty")     => readDifficulty()
           case curLine if curLine.startsWith("size")           => readSize()
-          case curLine if curLine.startsWith("//")             => readMetadata()
           case curLine if curLine.startsWith("endmetadata")    => metadataRead = true
         }
 
@@ -99,35 +122,32 @@ class FileParser {
         //Reads the name from a line "Name: [name]"
         def readName() = {
           name = split(rawLine)
-          readMetadata()
         }
 
         //Reads the starting resources from a line "StartResources: X20 Y20"
         def readResources() = {
           val rawResources = split(curLine).split(' ').map(_.replaceAll("\\D", "").toInt)
           startingResources = (rawResources(0), rawResources(1))
-          readMetadata()
         }
 
         //Reads the difficulty from a line "Difficulty: 3"
         def readDifficulty() = {
           difficulty = split(curLine).toInt
-          readMetadata()
         }
 
         //Reads the level size from a line "Size: 10x10"
         def readSize() = {
           val rawSize = split(curLine).split('x')
           size = (rawSize(0).toInt, rawSize(1).toInt)
-          readMetadata()
         }
+
+        if (!metadataRead) readMetadata()
       }
 
       //Reads the TILES block until ENDTILES is reached
       def readTileData(): Unit = {
 
         readNextLine()
-        println(rawLine)
 
         //Tile data
         var name = DefaultTileName
@@ -142,27 +162,22 @@ class FileParser {
 
         curLine match {
           case curLine if curLine.startsWith("tile")     => nextTile()
-          case curLine if curLine.startsWith("id")       => id = Some(split(curLine).toInt)
-          case curLine if curLine.startsWith("pic")      => image = loadImage(split(curLine))
-          case curLine if curLine.startsWith("type")     => tiletype = Some(split(curLine))
-          case curLine if curLine.startsWith("price")    => price = readPrice
-          case curLine if curLine.startsWith("damage")   => damage = split(curLine).toInt
-          case curLine if curLine.startsWith("reload")   => reload = split(curLine).toInt
-          case curLine if curLine.startsWith("range")    => range = split(curLine).toInt
-          case curLine if curLine.startsWith("//")       => readTileData()
           case curLine if curLine.startsWith("endtiles") => tilesRead = true
 
         }
 
         //Creates a tile based on the parameters read and adds it to the tiles Buffer
         def nextTile() = {
-          if (tiles.isEmpty) {
-            ()
-          } else if (tiletype.isEmpty || id.isEmpty) {
+          matchTileProperties()
+          if (tiletype.isEmpty || id.isEmpty) {
             throw new MapFileException("Error reading tile data")
           } else {
             tiletype.get match {
-              case "empty"    => createEmptyTile()
+              case "empty" => createEmptyTile()
+              case "entry" =>
+                createEmptyTile(); entryTile = Some(tiles.last)
+              case "exit" =>
+                createEmptyTile(); exitTile = Some(tiles.last)
               case "path"     => createPath()
               case "tower"    => createTower()
               case "building" => createBuilding()
@@ -176,14 +191,20 @@ class FileParser {
           def createBuilding() = tiles += new Building(name, image, (0, 0), price)
         }
 
-        //Returns an image from maps folder with "name"
-        def loadImage(name: String) = {
-          try {
-            new Image(new FileInputStream("pics/" + name), TileSize, TileSize, true, false)
-          } catch {
-            case e: FileNotFoundException =>
-              throw new MapFileException(s"Error finding $name")
+        //When a new TILE: block is reached, loop this method until the next one
+        def matchTileProperties(): Unit = {
+          readNextLine()
+          curLine match {
+            case curLine if curLine.startsWith("id")      => id = Some(split(curLine).toInt)
+            case curLine if curLine.startsWith("pic")     => image = loadImage(split(curLine))
+            case curLine if curLine.startsWith("type")    => tiletype = Some(split(curLine))
+            case curLine if curLine.startsWith("price")   => price = readPrice
+            case curLine if curLine.startsWith("damage")  => damage = split(curLine).toInt
+            case curLine if curLine.startsWith("reload")  => reload = split(curLine).toInt
+            case curLine if curLine.startsWith("range")   => range = split(curLine).toInt
+            case curLine if curLine.startsWith("endtile") => ()
           }
+          if (!curLine.startsWith("endtile")) matchTileProperties()
         }
 
         //Reads the price, formatted as "X20 Y20"
@@ -192,16 +213,57 @@ class FileParser {
           (rawPrice(0), rawPrice(1))
         }
 
-        if (!tilesRead) readTileData()
-
+        //Loop this method recursively until ENDTILE reached. After that, if MAP is also read, create a Grid
+        if (!tilesRead) readTileData() else if (mapRead) createGrid()
       } //readTileData()
 
-      def readMapData() = {
-        ???
+      //Reads the MAP block recursively until ENDMAP is reached, stores the IDs of every tile into a 2D-collection
+      def readMapData(): Unit = {
+
+        readNextLine()
+
+        if (!curLine.startsWith("endmap")) {
+          idGrid += curLine.split(' ').map(_.toInt)
+          readMapData()
+        } else {
+          mapRead = true
+          if(tilesRead) createGrid()
+        }
       }
 
+      //Reads the ENEMIES block until ENDENEMIES is reached,
       def readEnemyData() = {
-        ???
+
+        readNextLine()
+
+        var name = DefaultEnemyName
+        var speed = DefaultEnemySpeed
+        var health = DefaultEnemyHealth
+        var image = EnemyImage
+
+        curLine match {
+          case curLine if curLine.startsWith("enemy")      => nextEnemy()
+          case curLine if curLine.startsWith("endenemies") => enemiesRead = true
+        }
+
+        //Creates a new enemy object based on information found in the file
+        //Note that both TILES and MAP need to be read before ENEMIES (Enemy class needs a Grid as a parameter)
+        def nextEnemy(): Unit = {
+          if(!tilesRead || !mapRead)
+            throw new MapFileException("Incorrect placement of ENEMIES block")
+          
+          readNextLine()
+
+          curLine match {
+            case curLine if curLine.startsWith("speed")    => speed = split(curLine).toInt
+            case curLine if curLine.startsWith("health")   => health = split(curLine).toInt
+            case curLine if curLine.startsWith("speed")    => image = loadImage(split(curLine))
+            case curLine if curLine.startsWith("endenemy") => ()
+          }
+          //TODO: finish
+          if (!curLine.startsWith("endenemy")) nextEnemy() else enemies += new Enemy(name, image, (0, 0), ???)
+        }
+
       }
 
       def readWaveData() = {

@@ -35,7 +35,7 @@ object Temp {
   }
 
   def makeEnemy = {
-    new Enemy(EnemyImage, (3, -1), grid)
+    new Enemy("a", EnemyImage, (3, -1), grid)
   }
 
   def makeWave(time: Int) = {

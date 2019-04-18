@@ -5,10 +5,10 @@ TODE 1.0 MAP FILE
 
 METADATA
 	//Default values:
-	Name: Map
-	StartResources: X20 Y20
-	Difficulty: 3
-	Size: 10x10
+	NAME: Map
+	STARTRESOURCES: X20 Y20
+	DIFFICULTY: 3
+	SIZE: 10x10
 ENDMETADATA
 
 TILES
@@ -16,32 +16,65 @@ TILES
 		ID: 00
 		PIC: grass.png
 		TYPE: Empty
+	ENDTILE
 	TILE: PATH
 		ID: 01
 		PIC: path.png
-		TYPE: Traversable
+		TYPE: Path
+	ENDTILE
 	TILE: ENTRY
 		ID: 02
 		PIC: entry.png
-		TYPE: Traversable
+		TYPE: Entry
 		//ENTRYDIRECTION: left
+	ENDTILE
 	TILE: EXIT
 		ID: 03
 		PIC: exit.png
-		TYPE: Traversable
+		TYPE: Exit
 		//EXITDIRECTION: right
+	ENDTILE
 	TILE: TOWER1
 		ID: 04
 		PIC: tower.png
 		TYPE: Tower
-		Price: X10 Y5
-		Damage: 2
-		Reload: 3
+		PRICE: X10 Y5
+		DAMAGE: 2
+		RELOAD: 3
+	ENDTILE
 	TILE: BUILDING1
 		ID: 05
 		PIC: farm.png
 		TYPE: Building
-		Price: X5 Y20
+		PRICE: X5 Y20
+		ENDTILE
 ENDTILES
+
+MAP
+	05 00 01 01 01
+	00 00 01 04 01
+	02 01 01 00 01
+	00 00 04 00 03
+	00 00 00 00 00
+ENDMAP
+
+//MAP and TILES need to be read before ENEMIES
+ENEMIES
+	ENEMY : WALKER
+		SPEED: 3
+		HEALTH: 30
+		PIC: enemy.png
+	ENDNENEMY
+	ENEMY : RUNNER
+		SPEED: 5
+		HEALTH: 25
+		PIC: enemy.png
+	ENDNENEMY
+	ENEMY : BIGBOI
+		SPEED: 3
+		HEALTH: 200
+		PIC: enemy.png
+	ENDNENEMY
+ENDENEMIES
 
 END

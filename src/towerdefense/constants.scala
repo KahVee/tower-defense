@@ -12,6 +12,7 @@ package object towerdefense {
 
   //ENEMIES
   val EnemySize = TileSize / 2
+  val DefaultEnemyName = "Enemy"
   val DefaultEnemySpeed = 2
   val DefaultEnemyHealth = 2
   val EnemySpawnInterval = 0.5
