@@ -4,6 +4,8 @@ import scalafx.application.JFXApp
 import scalafx.Includes._
 import javafx.animation.AnimationTimer
 import towerdefense._
+import fileparser._
+import java.io.File
 import scalafx.beans.property._
 
 import scalafx.scene.image._
@@ -43,10 +45,14 @@ object GUI extends JFXApp {
   //Stores an inactive version of a building the player has selected. If the player clicks a tile and building is possible, this building will be built.
   private var selectedBuilding: Option[Building] = None
 
+  
+  val parser = new FileParser
+  parser.loadLevel("maps/testmap.map")
+  
   //Main game loop starting, creates the game, window and the layout within the window
   start()
   def start() = {
-    game = new Game(Temp.makeGrid, 10, 10, Vector(), Vector(), Vector(Temp.makeWave(0), Temp.makeWave(6)), 10)
+    game = new Game(DefaultLevelName, Temp.makeGrid, 10, 10, Vector(), Vector(), Vector(Temp.makeWave(0), Temp.makeWave(6)), 10)
     
     game.start()
 

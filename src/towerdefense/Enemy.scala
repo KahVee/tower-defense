@@ -5,7 +5,7 @@ import scalafx.scene.SnapshotParameters
 import scalafx.scene.paint._
 import scalafx.scene.transform.Rotate
 
-class Enemy(var image: Image, var coords: (Float, Float), private val grid: Grid) {
+class Enemy(val name: String, var image: Image, var coords: (Float, Float), private val grid: Grid) {
 
   private var speed = DefaultEnemySpeed
   private var health = DefaultEnemyHealth
@@ -88,7 +88,7 @@ class Enemy(var image: Image, var coords: (Float, Float), private val grid: Grid
 //helper object to make a new Enemy with copied parameters from another
 object Enemy {
   def apply(other: Enemy) = {
-    val newEnemy = new Enemy(other.image, other.coords, other.grid)
+    val newEnemy = new Enemy(other.name, other.image, other.coords, other.grid)
     newEnemy.speed = other.speed
     newEnemy.health = other.health
     newEnemy.direction = other.direction
