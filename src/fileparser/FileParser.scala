@@ -293,7 +293,7 @@ class FileParser {
             case curLine if curLine.startsWith("endenemy") => ()
           }
 
-          if (!curLine.startsWith("endenemy")) nextEnemy() else enemies += new Enemy(name, image, (0, 0), grid.getOrElse(throw new MapFileException("Error reading the map file: map data not found")))
+          if (!curLine.startsWith("endenemy")) nextEnemy() else enemies += new Enemy(name, image, speed, health, (0, 0), grid.getOrElse(throw new MapFileException("Error reading the map file: map data not found")))
         }
 
         if (!enemiesRead) readEnemyData()

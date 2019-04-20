@@ -3,6 +3,8 @@ package towerdefense
 import scala.math.Numeric.Implicits.infixNumericOps
 
 class Grid(val grid: Array[Array[Tile]], val entryTile: Tile, val exitTile: Tile) {
+  
+  val referenceEmptyTile = new Tile("referencetile", DefaultImage, (0, 0))
 
   def nextTile(dir: Direction, coords: (Int, Int)) = {
     val next = dir + coords

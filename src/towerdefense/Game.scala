@@ -21,6 +21,7 @@ class Game(val name: String, val grid: Grid, var resX: Int, var resY: Int, var b
   }
 
   def step(dt: Float) = {
+    println(enemies)
     enemies.foreach(_.step(dt))
     health -= enemies.filter(_.reachedTarget).size
     enemies = enemies.filter(_.isActive)

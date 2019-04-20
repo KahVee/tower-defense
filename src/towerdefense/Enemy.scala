@@ -5,10 +5,8 @@ import scalafx.scene.SnapshotParameters
 import scalafx.scene.paint._
 import scalafx.scene.transform.Rotate
 
-class Enemy(val name: String, var image: Image, var coords: (Float, Float), private val grid: Grid) {
+class Enemy(val name: String, var image: Image, private val speed: Int = DefaultEnemySpeed, private var health: Int = DefaultEnemyHealth, var coords: (Float, Float), private val grid: Grid) {
 
-  private var speed = DefaultEnemySpeed
-  private var health = DefaultEnemyHealth
   private var direction: Direction = Down
   private var imageDirection: Direction = Up //Always Up, determined by the image file rotation
 
@@ -32,16 +30,24 @@ class Enemy(val name: String, var image: Image, var coords: (Float, Float), priv
       //Checks, which tile the enemy is currently on
       updateCurrentTile()
 
-      var nextTile = grid.nextTile(direction, (coords._1.toInt, coords._2.toInt))
-      if (lastTile.getOrElse(null) == grid.exitTile) {
+      var nextTile = {
+        direction match {
+          case Up    => grid.nextTile(direction, (coords._1.toInt, math.ceil(coords._2).toInt))
+          case Down  => grid.nextTile(direction, (coords._1.toInt, coords._2.toInt))
+          case Left  => grid.nextTile(direction, (math.ceil(coords._1).toInt, coords._2.toInt))
+          case Right => grid.nextTile(direction, (coords._1.toInt, coords._2.toInt))
+        }
+      }
+
+      if (currentTile.getOrElse(null) == grid.exitTile && nextTile.getOrElse(null) != grid.exitTile) {
         reachedTarget = true
         isActive = false
       } else {
         //Checks if next tile forward is a path or if it was the tile the enemy came from and rotates if necessary
         //Uses .toInt instead of .round to stay close to the centers of the tiles
         //TODO: Make infinite loop not possible
-        if (currentTile != lastTile) {
-          while ((!nextTile.getOrElse(null).isInstanceOf[TraversableTile]) || nextTile == lastTile) {
+        if (currentTile != Some(grid.exitTile)) {
+          while ((!nextTile.getOrElse(grid.referenceEmptyTile).isInstanceOf[TraversableTile]) || nextTile == lastTile) {
             direction = direction.clockwise
             nextTile = grid.nextTile(direction, (coords._1.toInt, coords._2.toInt))
           }
@@ -89,9 +95,7 @@ class Enemy(val name: String, var image: Image, var coords: (Float, Float), priv
 //helper object to make a new Enemy with copied parameters from another
 object Enemy {
   def apply(other: Enemy) = {
-    val newEnemy = new Enemy(other.name, other.image, other.coords, other.grid)
-    newEnemy.speed = other.speed
-    newEnemy.health = other.health
+    val newEnemy = new Enemy(other.name, other.image, other.speed, other.health, other.coords, other.grid)
     newEnemy.direction = other.direction
     newEnemy.rotateImage
     newEnemy
