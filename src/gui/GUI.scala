@@ -39,22 +39,19 @@ object GUI extends JFXApp {
   private val gc = canvas.graphicsContext2D
 
   //Full contents of the window: Canvas, button grid...
-  private val centerContentVector: Vector[Node] = Vector(canvas, ButtonGrid.makeGrid(10, 10))
+  private var centerContentVector: Vector[Node] = Vector()
   private var sidebarButtons = Vector[Button]()
 
   //Stores an inactive version of a building the player has selected. If the player clicks a tile and building is possible, this building will be built.
   private var selectedBuilding: Option[Building] = None
 
-  
   val parser = new FileParser
-  parser.loadLevel("maps/testmap.map")
-  
+
   //Main game loop starting, creates the game, window and the layout within the window
   start()
   def start() = {
-    game = new Game(DefaultLevelName, Temp.makeGrid, 10, 10, Vector(), Vector(), Vector(Temp.makeWave(0), Temp.makeWave(6)), 10)
-    
-    game.start()
+    game = parser.loadLevel("maps/testmap.map") //new Game(DefaultLevelName, Temp.makeGrid, 10, 10, Vector(), Vector(Temp.makeWave(0), Temp.makeWave(6)), 10))
+    centerContentVector = Vector(canvas, ButtonGrid.makeGrid(game.grid.grid.size, game.grid.grid(0).size))
 
     stage = new JFXApp.PrimaryStage {
       title.value = "Tower Defense"
@@ -173,8 +170,8 @@ object GUI extends JFXApp {
 
   private def fpsString = "FPS: " + time.fps.round
   private def healthString = "Health: " + game.health
-  private def resourceText = new Text ("X: " + game.resX + "\nY: " + game.resY)
-  
+  private def resourceText = new Text("X: " + game.resX + "\nY: " + game.resY)
+
   private def losingScene = {
     new Scene {
       fill = Black

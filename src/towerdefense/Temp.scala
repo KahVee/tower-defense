@@ -17,12 +17,12 @@ object Temp {
 
         i match {
           case 3 if (j == 0) =>
-            newTile = new TraversableTile("A", EntryImage, (i, j)); entry = newTile
+            newTile = new TraversableTile("A", EntryImage, (i, j), Some(Up), None); entry = newTile
           case 8 if (j == 9) =>
-            newTile = new TraversableTile("A", ExitImage, (i, j)); exit = newTile
-          case 3 if (j < 4)                      => newTile = new TraversableTile("A", PathImage, (i, j))
-          case x if (x >= 3 && x <= 8 && j == 4) => newTile = new TraversableTile("A", PathImage, (i, j))
-          case 8 if (j > 4)                      => newTile = new TraversableTile("A", PathImage, (i, j))
+            newTile = new TraversableTile("A", ExitImage, (i, j), None, Some(Down)); exit = newTile
+          case 3 if (j < 4)                      => newTile = new TraversableTile("A", PathImage, (i, j), None, None)
+          case x if (x >= 3 && x <= 8 && j == 4) => newTile = new TraversableTile("A", PathImage, (i, j), None, None)
+          case 8 if (j > 4)                      => newTile = new TraversableTile("A", PathImage, (i, j), None, None)
           case _                                 => ()
         }
 

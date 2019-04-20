@@ -7,7 +7,7 @@ import scalafx.scene.image._
 
 class FileParser {
 
-  def loadLevel(filepath: String) = {
+  def loadLevel(filepath: String): Game = {
     /*
     val grid = new Grid()
     val game = new Game()
@@ -18,6 +18,7 @@ class FileParser {
     var startingResources = DefaultStartingResources
     var difficulty = DefaultDifficulty
     var size = DefaultLevelSize
+    var health = DefaultPlayerHealth
 
     //TILES
     val tiles = Buffer[Tile]()
@@ -31,6 +32,7 @@ class FileParser {
 
     //ENEMIES
     val enemies = Buffer[Enemy]()
+    val waves = Buffer[Wave]()
 
     val fileReader = try {
       new FileReader(new File(filepath))
@@ -76,11 +78,13 @@ class FileParser {
         }
       }
 
+      if (!(metadataRead && tilesRead && mapRead && enemiesRead && wavesRead))
+        throw new MapFileException("Missing data block")
+
       //Reads the next line, and repeats, if there is only whitespace
       def readNextLine(): Unit = {
         rawLine = lineReader.readLine
         curLine = rawLine.trim.toLowerCase
-        println(rawLine)
         if (curLine == "" || curLine.startsWith("//")) readNextLine()
       }
 
@@ -90,18 +94,34 @@ class FileParser {
       }
 
       //Returns an image from maps folder with "name"
-      def loadImage(name: String) = {
+      def loadImage(name: String, imageType: String) = {
+        val imageSize = if (imageType == "tile") TileSize else EnemySize
         try {
-          new Image(new FileInputStream("pics/" + name), TileSize, TileSize, true, false)
+          new Image(new FileInputStream("pics/" + name), imageSize, imageSize, true, false)
         } catch {
           case e: FileNotFoundException =>
             throw new MapFileException(s"Error finding $name")
         }
       }
-      
-      //TODO: implement
+
+      //creates a final Grid object for the game
       def createGrid() = {
-        
+        val arr = Array.ofDim[Tile](size._1, size._2)
+        val transposedIdGrid = idGrid.transpose
+        for (
+          i <- 0 until size._1;
+          j <- 0 until size._2
+        ) {
+          arr(i)(j) = tiles(transposedIdGrid(i)(j)).clone(i, j)
+          if (tiles(transposedIdGrid(i)(j)) == entryTile.getOrElse(throw new MapFileException("Error readimg map file")))
+            entryTile = Some(arr(i)(j))
+
+          else if (tiles(transposedIdGrid(i)(j)) == exitTile.getOrElse(throw new MapFileException("Error readimg map file")))
+            exitTile = Some(arr(i)(j))
+        }
+
+        //val arr = idGrid.map(x => x.map(y => tiles(y).clone(idGrid.indexOf(x), x.indexOf(y)))).toArray
+        grid = Some(new Grid(arr, entryTile.getOrElse(throw new MapFileException("Error readimg map file")), exitTile.getOrElse(throw new MapFileException("Error readimg map file"))))
       }
 
       //Reads the METADATA block until ENDMETADATA is reached
@@ -152,7 +172,7 @@ class FileParser {
         //Tile data
         var name = DefaultTileName
         var image = DefaultImage
-        var tiletype: Option[String] = None
+        var tileType: Option[String] = None
         var id: Option[Int] = None
 
         var price = DefaultBuildingPrice
@@ -169,24 +189,35 @@ class FileParser {
         //Creates a tile based on the parameters read and adds it to the tiles Buffer
         def nextTile() = {
           matchTileProperties()
-          if (tiletype.isEmpty || id.isEmpty) {
+          if (tileType.isEmpty || id.isEmpty) {
             throw new MapFileException("Error reading tile data")
           } else {
-            tiletype.get match {
+            val tile = tileType.get
+            tile match {
               case "empty" => createEmptyTile()
-              case "entry" =>
-                createEmptyTile(); entryTile = Some(tiles.last)
-              case "exit" =>
-                createEmptyTile(); exitTile = Some(tiles.last)
-              case "path"     => createPath()
+              case tile if tile.startsWith("entry") =>
+                createPath(Some(findDirection(tile.split('-')(1))), None); entryTile = Some(tiles.last)
+              case tile if tile.startsWith("exit") =>
+                createPath(None, Some(findDirection(tile.split('-')(1)))); exitTile = Some(tiles.last)
+              case "path"     => createPath(None, None)
               case "tower"    => createTower()
               case "building" => createBuilding()
               case _          => throw new MapFileException("Invalid tile type")
             }
           }
 
+          def findDirection(input: String) = {
+            input match {
+              case input if input.startsWith("up")    => Up
+              case input if input.startsWith("down")  => Down
+              case input if input.startsWith("left")  => Left
+              case input if input.startsWith("right") => Right
+              case _                                  => throw new MapFileException("Couldn't determine entry/exit direction")
+            }
+          }
+
           def createEmptyTile() = tiles += new Tile(name, image, (0, 0))
-          def createPath() = tiles += new TraversableTile(name, image, (0, 0))
+          def createPath(entryDir: Option[Direction], exitDir: Option[Direction]) = tiles += new TraversableTile(name, image, (0, 0), entryDir, exitDir)
           def createTower() = tiles += new Tower(name, image, (0, 0), price, damage, reload, range)
           def createBuilding() = tiles += new Building(name, image, (0, 0), price)
         }
@@ -196,8 +227,8 @@ class FileParser {
           readNextLine()
           curLine match {
             case curLine if curLine.startsWith("id")      => id = Some(split(curLine).toInt)
-            case curLine if curLine.startsWith("pic")     => image = loadImage(split(curLine))
-            case curLine if curLine.startsWith("type")    => tiletype = Some(split(curLine))
+            case curLine if curLine.startsWith("pic")     => image = loadImage(split(curLine), "tile")
+            case curLine if curLine.startsWith("type")    => tileType = Some(split(curLine))
             case curLine if curLine.startsWith("price")   => price = readPrice
             case curLine if curLine.startsWith("damage")  => damage = split(curLine).toInt
             case curLine if curLine.startsWith("reload")  => reload = split(curLine).toInt
@@ -227,12 +258,12 @@ class FileParser {
           readMapData()
         } else {
           mapRead = true
-          if(tilesRead) createGrid()
+          if (tilesRead) createGrid()
         }
       }
 
       //Reads the ENEMIES block until ENDENEMIES is reached,
-      def readEnemyData() = {
+      def readEnemyData(): Unit = {
 
         readNextLine()
 
@@ -242,33 +273,63 @@ class FileParser {
         var image = EnemyImage
 
         curLine match {
-          case curLine if curLine.startsWith("enemy")      => nextEnemy()
+          case curLine if curLine.startsWith("enemy") =>
+            name = split(curLine); nextEnemy()
           case curLine if curLine.startsWith("endenemies") => enemiesRead = true
         }
 
         //Creates a new enemy object based on information found in the file
         //Note that both TILES and MAP need to be read before ENEMIES (Enemy class needs a Grid as a parameter)
         def nextEnemy(): Unit = {
-          if(!tilesRead || !mapRead)
+          if (!tilesRead || !mapRead)
             throw new MapFileException("Incorrect placement of ENEMIES block")
-          
+
           readNextLine()
 
           curLine match {
             case curLine if curLine.startsWith("speed")    => speed = split(curLine).toInt
             case curLine if curLine.startsWith("health")   => health = split(curLine).toInt
-            case curLine if curLine.startsWith("speed")    => image = loadImage(split(curLine))
+            case curLine if curLine.startsWith("pic")      => image = loadImage(split(curLine), "enemy")
             case curLine if curLine.startsWith("endenemy") => ()
           }
-          //TODO: finish
-          if (!curLine.startsWith("endenemy")) nextEnemy() else enemies += new Enemy(name, image, (0, 0), ???)
+
+          if (!curLine.startsWith("endenemy")) nextEnemy() else enemies += new Enemy(name, image, (0, 0), grid.getOrElse(throw new MapFileException("Error reading the map file: map data not found")))
         }
 
+        if (!enemiesRead) readEnemyData()
       }
 
-      def readWaveData() = {
-        ???
+      //Reads the WAVES block until ENDWAVES is reached
+      def readWaveData(): Unit = {
+
+        readNextLine()
+
+        val enemiesWithAmounts = Buffer[(Enemy, Int)]()
+        var time = 0;
+
+        curLine match {
+          case curLine if curLine.startsWith("wave") =>
+            time = split(curLine).toInt; nextWave()
+          case curLine if curLine.startsWith("endwaves") => wavesRead = true
+        }
+
+        def nextWave(): Unit = {
+
+          readNextLine()
+          if (!curLine.startsWith("endwave")) {
+            val line = curLine.split(' ')
+            val amount = line(0).toInt
+            val enemy = enemies.find(_.name == line(1)).getOrElse(throw new MapFileException("Invalid enemy name"))
+            enemiesWithAmounts += ((enemy, amount))
+            nextWave()
+          }
+        }
+        waves += new Wave(enemiesWithAmounts.toVector, time)
+        if (!wavesRead) readWaveData()
       }
+
+      //Returns a game
+      new Game(name, grid.get, startingResources._1, startingResources._2, tiles.filter(_.isInstanceOf[Building]).map(_.asInstanceOf[Building]).toVector, waves.toVector, health)
 
     } catch {
       case e: IOException =>

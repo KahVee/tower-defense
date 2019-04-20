@@ -3,11 +3,12 @@ package towerdefense
 import scala.collection.mutable.Buffer
 import scalafx.scene.image._
 
-class Game(val name: String, val grid: Grid, var resX: Int, var resY: Int, var buildableBuildings: Vector[Building], var enemies: Vector[Enemy], private var waves: Vector[Wave], var health: Int) {
+class Game(val name: String, val grid: Grid, var resX: Int, var resY: Int, var buildableBuildings: Vector[Building], private var waves: Vector[Wave], var health: Int) {
 
   private var timePassed = 0F
 
   var builtBuildings = Vector[Building]()
+  var enemies = Vector[Enemy]()
   private var queuedEnemies = Vector[Enemy]()
   private var lastSpawnedEnemyTime = 0F
 
@@ -15,32 +16,25 @@ class Game(val name: String, val grid: Grid, var resX: Int, var resY: Int, var b
 
   //DEBUGGING METHOD FOR NOW
   def start() = {
-    val farm = new Building("A", FarmImage, (5,5), DefaultBuildingPrice)
-    val tower = new Tower("B", TowerImage, (6,5), DefaultBuildingPrice)
-    grid.grid(5)(5) = farm
-    grid.grid(6)(5) = tower
-    buildableBuildings = Vector(Building(farm, (0, 0)), Building(tower, (0,0)))
-    builtBuildings = Vector(farm, tower)
+    builtBuildings = grid.grid.flatten.filter(_.isInstanceOf[Building]).map(_.asInstanceOf[Building]).toVector
     builtBuildings.foreach(_.isActive = true)
   }
-  
+
   def step(dt: Float) = {
     enemies.foreach(_.step(dt))
     health -= enemies.filter(_.reachedTarget).size
     enemies = enemies.filter(_.isActive)
-
     builtBuildings.foreach(_.step(timePassed))
-    
+
     if (!waves.isEmpty) {
       if (timePassed > waves(0).time) {
         spawnWave(waves(0))
         waves = waves.tail
       }
     }
-    
+
     //If there are enemies in the spawn queue, spawn a new one when the appropriate time has passed
     if (!queuedEnemies.isEmpty && timePassed > lastSpawnedEnemyTime + EnemySpawnInterval) spawnEnemyFromQueue
-
     timePassed += dt
   }
 
@@ -66,20 +60,21 @@ class Game(val name: String, val grid: Grid, var resX: Int, var resY: Int, var b
 
   //Activates the next enemy from the queue, adds it to the active enemies Vector, and updates the last spawned time
   def spawnEnemyFromQueue = {
-      queuedEnemies(0).isActive = true
-      enemies = enemies :+ queuedEnemies(0)
-      queuedEnemies = queuedEnemies.tail
-      lastSpawnedEnemyTime = timePassed
+    queuedEnemies(0).coords = ((grid.entryTile.asInstanceOf[TraversableTile].entryDirection.get + (grid.entryTile.coords._1.toFloat, grid.entryTile.coords._2.toFloat)))
+    queuedEnemies(0).isActive = true
+    enemies = enemies :+ queuedEnemies(0)
+    queuedEnemies = queuedEnemies.tail
+    lastSpawnedEnemyTime = timePassed
   }
 
-  //Loads a wave of enemies into the spawn queue. 
+  //Loads a wave of enemies into the spawn queue.
   def spawnWave(wave: Wave) = {
-    wave.enemies.foreach( x =>
-    for (i <- 0 until x._2) {
-      queuedEnemies = queuedEnemies :+ Enemy(x._1)
-    })
+    wave.enemies.foreach(x =>
+      for (i <- 0 until x._2) {
+        queuedEnemies = queuedEnemies :+ Enemy(x._1)
+      })
   }
-  
+
   //Builds a given building in the given coordinates and activates it. Updates the resources, grid and list of built buildings.
   def buildBuilding(building: Building, coords: (Int, Int)) = {
     val newBuilding = Building(building, coords)
