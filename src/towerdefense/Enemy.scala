@@ -57,7 +57,7 @@ class Enemy(val name: String, var image: Image, private val speed: Int = Default
         if (imageDirection != direction) rotateImage
 
         //Move the enemy
-        val dcoords = direction * (speed * dt)
+        val dcoords = direction * (0.5F * speed * dt)
         coords = (coords._1 + dcoords._1, coords._2 + dcoords._2)
       }
     }

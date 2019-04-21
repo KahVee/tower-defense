@@ -21,9 +21,9 @@ class Game(val name: String, val grid: Grid, var resX: Int, var resY: Int, var b
   }
 
   def step(dt: Float) = {
-    println(enemies)
     enemies.foreach(_.step(dt))
     health -= enemies.filter(_.reachedTarget).size
+    enemies.foreach(x => if (x.isDead) addKillReward())
     enemies = enemies.filter(_.isActive)
     builtBuildings.foreach(_.step(timePassed))
 
@@ -78,12 +78,17 @@ class Game(val name: String, val grid: Grid, var resX: Int, var resY: Int, var b
 
   //Builds a given building in the given coordinates and activates it. Updates the resources, grid and list of built buildings.
   def buildBuilding(building: Building, coords: (Int, Int)) = {
-    val newBuilding = Building(building, coords)
+    val newBuilding = building.clone(coords)
     resX -= newBuilding.price._1
     resY -= newBuilding.price._2
     grid.grid(coords._1)(coords._2) = newBuilding
     builtBuildings = builtBuildings :+ newBuilding
     newBuilding.isActive = true
+  }
+
+  def addKillReward() = {
+    resX += EnemyKillReward._1
+    resY += EnemyKillReward._2
   }
 
 }

@@ -50,7 +50,7 @@ object GUI extends JFXApp {
   //Main game loop starting, creates the game, window and the layout within the window
   start()
   def start() = {
-    game = parser.loadLevel("maps/testmap.map") //new Game(DefaultLevelName, Temp.makeGrid, 10, 10, Vector(), Vector(Temp.makeWave(0), Temp.makeWave(6)), 10))
+    game = parser.loadLevel("maps/testmap.map")
     centerContentVector = Vector(canvas, ButtonGrid.makeGrid(game.grid.grid.size, game.grid.grid(0).size))
 
     stage = new JFXApp.PrimaryStage {
@@ -130,6 +130,7 @@ object GUI extends JFXApp {
     game.getDrawables.foreach(x => gc.drawImage(x._1, x._2, x._3))
     gc.fillText(fpsString, 0, 10)
     gc.fillText(healthString, 0, 20)
+    gc.fillText(resourceString, 0, 30)
   }
 
   //Application exit method, gets called when main window is closed
@@ -170,8 +171,10 @@ object GUI extends JFXApp {
 
   private def fpsString = "FPS: " + time.fps.round
   private def healthString = "Health: " + game.health
+  private def resourceString = "X: " + game.resX + " Y: " + game.resY
   private def resourceText = new Text("X: " + game.resX + "\nY: " + game.resY)
 
+  //Scene that replaces the game when it's over
   private def losingScene = {
     new Scene {
       fill = Black

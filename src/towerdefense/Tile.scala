@@ -22,20 +22,34 @@ class Building(name: String, image: Image, coords: (Int, Int), val price: (Int, 
 
   override val buildable = false
   var isActive = false
-  protected var game = gui.GUI.game
+  protected val game = gui.GUI.game
 
+  def step(now: Float) = ()
+  
   override def clone(newCoords: (Int, Int)) = new Building(this.name, this.image, newCoords, this.price)
-
-  def step(now: Float) = {
-
-  }
 
   override def toString = "building at " + coords.toString
 }
 
-class Tower(name: String, image: Image, coords: (Int, Int), price: (Int, Int), val damage: Int = DefaultTowerDamage, val reload: Float = DefaultReload, val range: Int = DefaultRange) extends Building(name, image, coords, price) {
+//"Production" is how many times per minute a building produces 1x of the resource
+class ProductionBuilding(name: String, image: Image, coords: (Int, Int), price: (Int, Int), private val productionAmount: (Int, Int) = DefaultBuildingProductionAmount, private val productionSpeed: Int = DefaultBuildingProductionSpeed) extends Building(name, image, coords, price) {
 
-  override val buildable = false
+  private var lastProductionTime = 0F
+
+  override def step(now: Float) = {
+    if (isActive) {
+      if (now > lastProductionTime + (60.0 / productionSpeed)) {
+        game.resX += productionAmount._1
+        game.resY += productionAmount._2
+        lastProductionTime = now
+      }
+    }
+  }
+
+  override def clone(newCoords: (Int, Int)) = new ProductionBuilding(this.name, this.image, newCoords, this.price, this.productionAmount, this.productionSpeed)
+}
+
+class Tower(name: String, image: Image, coords: (Int, Int), price: (Int, Int), private val damage: Int = DefaultTowerDamage, private val reload: Float = DefaultReload, private val range: Int = DefaultRange) extends Building(name, image, coords, price) {
 
   private var target: Option[Enemy] = None
   private var lastShotTime = 0F
@@ -64,18 +78,4 @@ class Tower(name: String, image: Image, coords: (Int, Int), price: (Int, Int), v
   }
 
   override def toString = "tower at " + coords.toString
-}
-
-//Helper object to copy "sleeping" reference buildings into new active ones
-object Building {
-  def apply(other: Building, coords: (Int, Int)) = {
-    if (other.isInstanceOf[Tower]) {
-      val tower = other.asInstanceOf[Tower]
-      val newTower = new Tower(tower.name, tower.image, coords, tower.price, tower.damage)
-      newTower
-    } else {
-      val building = new Building(other.name, other.image, coords, other.price)
-      building
-    }
-  }
 }

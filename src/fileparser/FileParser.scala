@@ -221,7 +221,7 @@ class FileParser {
           def createEmptyTile() = tiles += new Tile(name, image, (0, 0))
           def createPath(entryDir: Option[Direction], exitDir: Option[Direction]) = tiles += new TraversableTile(name, image, (0, 0), entryDir, exitDir)
           def createTower() = tiles += new Tower(name, image, (0, 0), price, damage, reload, range)
-          def createBuilding() = tiles += new Building(name, image, (0, 0), price)
+          def createBuilding() = tiles += new ProductionBuilding(name, image, (0, 0), price)
         }
 
         //When a new TILE: block is reached, loop this method until the next one
@@ -331,7 +331,7 @@ class FileParser {
       }
 
       //Returns a game
-      new Game(name, grid.get, startingResources._1, startingResources._2, tiles.filter(_.isInstanceOf[Building]).map(_.asInstanceOf[Building]).toVector, waves.toVector, health)
+      new Game(name, grid.get, startingResources._1, startingResources._2, tiles.filter(x => x.isInstanceOf[Building]).map(_.asInstanceOf[Building]).toVector, waves.toVector, health)
 
     } catch {
       case e: IOException =>
