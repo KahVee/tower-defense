@@ -25,7 +25,7 @@ TILES
 	TILE: ENTRY
 		ID: 02
 		PIC: entry.png
-		TYPE: Entry-Center
+		TYPE: Entry-Left
 	ENDTILE
 	TILE: EXIT
 		ID: 03

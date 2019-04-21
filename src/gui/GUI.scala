@@ -53,13 +53,13 @@ object GUI extends JFXApp {
   //Main game loop starting, creates the game, window and the layout within the window
   start()
   def start() = {
-    game = parser.loadLevel("maps/testmap.map")
+    game = parser.loadLevel("maps/bigmap.map")
     mainCanvas = new Canvas(TileSize * game.grid.grid.size, TileSize * game.grid.grid(0).size)
     gc = mainCanvas.graphicsContext2D
     centerContentVector = Vector(mainCanvas, ButtonGrid.makeGrid(game.grid.grid.size, game.grid.grid(0).size))
 
     bottomGc.setFill(White)
-    bottomGc.setFont(Font.font("Arial", 20))
+    bottomGc.setFont(Font.font(20))
 
     stage = new JFXApp.PrimaryStage {
       title.value = "Tower Defense"

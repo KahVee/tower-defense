@@ -3,6 +3,7 @@ package gui
 import scalafx.scene.layout.GridPane
 import scalafx.scene.control.Button
 import scalafx.Includes._
+import scalafx.scene.text.Font
 
 import towerdefense._
 
@@ -20,6 +21,7 @@ object ButtonGrid {
 
         //Drawing the button names drops fps by over 60%
         add(new Button(if (DebugMode) s"($i, $j)" else "") {
+          font = Font.font(10)
           prefWidth = TileSize
           prefHeight = TileSize
 

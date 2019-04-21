@@ -208,7 +208,6 @@ class FileParser {
             }
           }
 
-          //TODO: "center" => dir(0, 0)
           def findDirection(input: String) = {
             input match {
               case input if input.startsWith("up")     => Some(Up)

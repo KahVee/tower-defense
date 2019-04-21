@@ -9,7 +9,7 @@ package object towerdefense {
   val SidebarPadding = 2
   val BottomPadding = 10
   val DefaultPlayerHealth = 10
-  val DebugMode = false
+  val DebugMode = true
 
   //ENEMIES
   val EnemySize = TileSize / 2
