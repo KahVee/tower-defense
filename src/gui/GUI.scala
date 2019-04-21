@@ -35,8 +35,11 @@ object GUI extends JFXApp {
   }
 
   //Canvas that the tiles and enemies are drawn on using the graphicsContext
-  private val canvas = new Canvas(TileSize * 10, TileSize * 10)
-  private val gc = canvas.graphicsContext2D
+  private var mainCanvas = new Canvas(TileSize, TileSize)
+  private var gc = mainCanvas.graphicsContext2D
+
+  private val bottomCanvas = new Canvas(120, 64)
+  private val bottomGc = bottomCanvas.graphicsContext2D
 
   //Full contents of the window: Canvas, button grid...
   private var centerContentVector: Vector[Node] = Vector()
@@ -51,7 +54,12 @@ object GUI extends JFXApp {
   start()
   def start() = {
     game = parser.loadLevel("maps/testmap.map")
-    centerContentVector = Vector(canvas, ButtonGrid.makeGrid(game.grid.grid.size, game.grid.grid(0).size))
+    mainCanvas = new Canvas(TileSize * game.grid.grid.size, TileSize * game.grid.grid(0).size)
+    gc = mainCanvas.graphicsContext2D
+    centerContentVector = Vector(mainCanvas, ButtonGrid.makeGrid(game.grid.grid.size, game.grid.grid(0).size))
+
+    bottomGc.setFill(White)
+    bottomGc.setFont(Font.font("Arial", 20))
 
     stage = new JFXApp.PrimaryStage {
       title.value = "Tower Defense"
@@ -66,7 +74,8 @@ object GUI extends JFXApp {
         //Discards selected building and "clears" the highlight effect when mouse is clicked outside any button
         def discardSelectedBuilding() = {
           selectedBuilding = None
-          canvas.requestFocus()
+          //This line "removes" the highlight effect from the previously selected button
+          mainCanvas.requestFocus()
         }
 
         onMousePressed = e => {
@@ -88,16 +97,14 @@ object GUI extends JFXApp {
           bottom = new HBox {
             spacing = BottomPadding
             //TODO: Fix the resourceText, currently it doesn't update properly
-            children = Vector(pauseButton, new VBox {
-              children = resourceText
-            })
+            children = Vector(pauseButton, bottomCanvas)
           }
 
           //Left contains a vertical stack of building buttons
           left = new VBox {
             padding = new javafx.geometry.Insets(SidebarPadding)
             spacing = SidebarPadding
-            children = for (building <- game.buildableBuildings) yield sidebarButton(building)
+            children = game.buildableBuildings.map(sidebarButton(_)) //for (building <- game.buildableBuildings) yield sidebarButton(building)
           }
         }
       }
@@ -128,9 +135,11 @@ object GUI extends JFXApp {
   def updateScene() = {
     //getDrawables returns a vector of images, each of which has its coordinates stored in the tuple's second and third slot
     game.getDrawables.foreach(x => gc.drawImage(x._1, x._2, x._3))
-    gc.fillText(fpsString, 0, 10)
-    gc.fillText(healthString, 0, 20)
-    gc.fillText(resourceString, 0, 30)
+    if(DebugMode) gc.fillText(fpsString, 0, 10)
+    bottomGc.clearRect(0, 0, 120, 64)
+    bottomGc.fillText(healthString, 0, 15)
+    bottomGc.strokeText(resourceString, 0, 40)
+    bottomGc.fillText(resourceString, 0, 40)
   }
 
   //Application exit method, gets called when main window is closed
@@ -171,8 +180,7 @@ object GUI extends JFXApp {
 
   private def fpsString = "FPS: " + time.fps.round
   private def healthString = "Health: " + game.health
-  private def resourceString = "X: " + game.resX + " Y: " + game.resY
-  private def resourceText = new Text("X: " + game.resX + "\nY: " + game.resY)
+  private def resourceString = "X: " + game.resX + "\nY: " + game.resY
 
   //Scene that replaces the game when it's over
   private def losingScene = {

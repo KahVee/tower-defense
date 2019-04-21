@@ -104,6 +104,12 @@ class FileParser {
         }
       }
 
+      //Reads the resources from a line "[]: X20 Y20"
+      def readResources = {
+        val rawResources = split(curLine).split(' ').map(_.replaceAll("\\D", "").toInt)
+        (rawResources(0), rawResources(1))
+      }
+
       //creates a final Grid object for the game
       def createGrid() = {
         val arr = Array.ofDim[Tile](size._1, size._2)
@@ -131,7 +137,7 @@ class FileParser {
 
         curLine match {
           case curLine if curLine.startsWith("name")           => readName()
-          case curLine if curLine.startsWith("startresources") => readResources()
+          case curLine if curLine.startsWith("startresources") => startingResources = readResources
           case curLine if curLine.startsWith("difficulty")     => readDifficulty()
           case curLine if curLine.startsWith("size")           => readSize()
           case curLine if curLine.startsWith("endmetadata")    => metadataRead = true
@@ -142,12 +148,6 @@ class FileParser {
         //Reads the name from a line "Name: [name]"
         def readName() = {
           name = split(rawLine)
-        }
-
-        //Reads the starting resources from a line "StartResources: X20 Y20"
-        def readResources() = {
-          val rawResources = split(curLine).split(' ').map(_.replaceAll("\\D", "").toInt)
-          startingResources = (rawResources(0), rawResources(1))
         }
 
         //Reads the difficulty from a line "Difficulty: 3"
@@ -179,6 +179,8 @@ class FileParser {
         var damage = DefaultTowerDamage
         var reload = DefaultReload
         var range = DefaultRange
+        var production = DefaultBuildingProductionAmount
+        var speed = DefaultBuildingProductionSpeed
 
         curLine match {
           case curLine if curLine.startsWith("tile")     => nextTile()
@@ -221,21 +223,23 @@ class FileParser {
           def createEmptyTile() = tiles += new Tile(name, image, (0, 0))
           def createPath(entryDir: Option[Direction], exitDir: Option[Direction]) = tiles += new TraversableTile(name, image, (0, 0), entryDir, exitDir)
           def createTower() = tiles += new Tower(name, image, (0, 0), price, damage, reload, range)
-          def createBuilding() = tiles += new ProductionBuilding(name, image, (0, 0), price)
+          def createBuilding() = tiles += new ProductionBuilding(name, image, (0, 0), price, production, speed)
         }
 
         //When a new TILE: block is reached, loop this method until the next one
         def matchTileProperties(): Unit = {
           readNextLine()
           curLine match {
-            case curLine if curLine.startsWith("id")      => id = Some(split(curLine).toInt)
-            case curLine if curLine.startsWith("pic")     => image = loadImage(split(curLine), "tile")
-            case curLine if curLine.startsWith("type")    => tileType = Some(split(curLine))
-            case curLine if curLine.startsWith("price")   => price = readPrice
-            case curLine if curLine.startsWith("damage")  => damage = split(curLine).toInt
-            case curLine if curLine.startsWith("reload")  => reload = split(curLine).toInt
-            case curLine if curLine.startsWith("range")   => range = split(curLine).toInt
-            case curLine if curLine.startsWith("endtile") => ()
+            case curLine if curLine.startsWith("id")         => id = Some(split(curLine).toInt)
+            case curLine if curLine.startsWith("pic")        => image = loadImage(split(curLine), "tile")
+            case curLine if curLine.startsWith("type")       => tileType = Some(split(curLine))
+            case curLine if curLine.startsWith("price")      => price = readResources
+            case curLine if curLine.startsWith("damage")     => damage = split(curLine).toInt
+            case curLine if curLine.startsWith("reload")     => reload = split(curLine).toInt
+            case curLine if curLine.startsWith("range")      => range = split(curLine).toInt
+            case curLine if curLine.startsWith("production") => production = readResources
+            case curLine if curLine.startsWith("speed")      => speed = split(curLine).toInt
+            case curLine if curLine.startsWith("endtile")    => ()
           }
           if (!curLine.startsWith("endtile")) matchTileProperties()
         }
@@ -273,6 +277,7 @@ class FileParser {
         var speed = DefaultEnemySpeed
         var health = DefaultEnemyHealth
         var image = EnemyImage
+        var reward = DefaultEnemyKillReward
 
         curLine match {
           case curLine if curLine.startsWith("enemy") =>
@@ -292,10 +297,11 @@ class FileParser {
             case curLine if curLine.startsWith("speed")    => speed = split(curLine).toInt
             case curLine if curLine.startsWith("health")   => health = split(curLine).toInt
             case curLine if curLine.startsWith("pic")      => image = loadImage(split(curLine), "enemy")
+            case curLine if curLine.startsWith("reward")   => reward = readResources
             case curLine if curLine.startsWith("endenemy") => ()
           }
 
-          if (!curLine.startsWith("endenemy")) nextEnemy() else enemies += new Enemy(name, image, speed, health, (0, 0), grid.getOrElse(throw new MapFileException("Error reading the map file: map data not found")))
+          if (!curLine.startsWith("endenemy")) nextEnemy() else enemies += new Enemy(name, image, speed, health, reward, (0, 0), grid.getOrElse(throw new MapFileException("Error reading the map file: map data not found")))
         }
 
         if (!enemiesRead) readEnemyData()
@@ -335,13 +341,13 @@ class FileParser {
 
     } catch {
       case e: IOException =>
-        throw new MapFileException("Error reading the map file")
+        throw new MapFileException("Error reading the map file: IO")
 
       case e: NumberFormatException =>
-        throw new MapFileException("Error reading the map file")
+        throw new MapFileException("Error reading the map file: NumberFormat")
 
       case e: MatchError =>
-        throw new MapFileException("Error reading the map file")
+        throw new MapFileException("Error reading the map file: Match")
 
     }
   }

@@ -23,7 +23,7 @@ class Game(val name: String, val grid: Grid, var resX: Int, var resY: Int, var b
   def step(dt: Float) = {
     enemies.foreach(_.step(dt))
     health -= enemies.filter(_.reachedTarget).size
-    enemies.foreach(x => if (x.isDead) addKillReward())
+    enemies.foreach(x => if (x.isDead) addKillReward(x))
     enemies = enemies.filter(_.isActive)
     builtBuildings.foreach(_.step(timePassed))
 
@@ -86,9 +86,9 @@ class Game(val name: String, val grid: Grid, var resX: Int, var resY: Int, var b
     newBuilding.isActive = true
   }
 
-  def addKillReward() = {
-    resX += EnemyKillReward._1
-    resY += EnemyKillReward._2
+  def addKillReward(enemy: Enemy) = {
+    resX += enemy.killReward._1
+    resY += enemy.killReward._2
   }
 
 }

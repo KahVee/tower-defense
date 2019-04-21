@@ -61,7 +61,7 @@ class Tower(name: String, image: Image, coords: (Int, Int), price: (Int, Int), p
   override def step(now: Float) = {
     if (isActive) {
       if (now > lastShotTime + reload) {
-        target = findClosestTarget(game.enemies)
+        target = findClosestTarget(game.enemies.filterNot(_.isDead))
         if (target.isDefined) {
           target.get.takeDamage(damage)
           lastShotTime = now

@@ -5,7 +5,7 @@ import scalafx.scene.SnapshotParameters
 import scalafx.scene.paint._
 import scalafx.scene.transform.Rotate
 
-class Enemy(val name: String, var image: Image, private val speed: Int = DefaultEnemySpeed, private var health: Int = DefaultEnemyHealth, var coords: (Float, Float), private val grid: Grid) {
+class Enemy(val name: String, var image: Image, private val speed: Int = DefaultEnemySpeed, private var health: Int = DefaultEnemyHealth, val killReward: (Int, Int) = DefaultEnemyKillReward, var coords: (Float, Float), private val grid: Grid) {
 
   private var direction: Direction = Down
   private var imageDirection: Direction = Up //Always Up, determined by the image file rotation
@@ -95,7 +95,7 @@ class Enemy(val name: String, var image: Image, private val speed: Int = Default
 //helper object to make a new Enemy with copied parameters from another
 object Enemy {
   def apply(other: Enemy) = {
-    val newEnemy = new Enemy(other.name, other.image, other.speed, other.health, other.coords, other.grid)
+    val newEnemy = new Enemy(other.name, other.image, other.speed, other.health, other.killReward, other.coords, other.grid)
     newEnemy.direction = other.direction
     newEnemy.rotateImage
     newEnemy

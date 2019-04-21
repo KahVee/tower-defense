@@ -10,6 +10,7 @@ package object towerdefense {
   val SidebarPadding = 2
   val BottomPadding = 10
   val DefaultPlayerHealth = 10
+  val DebugMode = false
 
   //ENEMIES
   val EnemySize = TileSize / 2
@@ -17,7 +18,7 @@ package object towerdefense {
   val DefaultEnemySpeed = 2
   val DefaultEnemyHealth = 2
   val EnemySpawnInterval = 0.5
-  val EnemyKillReward = (2, 0)
+  val DefaultEnemyKillReward = (2, 0)
   
   //BUILDINGS
   val DefaultTileName = "Tile"

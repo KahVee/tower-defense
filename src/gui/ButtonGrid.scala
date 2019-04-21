@@ -19,7 +19,7 @@ object ButtonGrid {
       ) {
 
         //Drawing the button names drops fps by over 60%
-        add(new Button( /*s"($i, $j)"*/ ) {
+        add(new Button(if (DebugMode) s"($i, $j)" else "") {
           prefWidth = TileSize
           prefHeight = TileSize
 
