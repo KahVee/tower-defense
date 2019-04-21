@@ -36,11 +36,13 @@ sealed abstract class Direction(val dir: (Int, Int)) {
     case Right => Down
     case Down  => Left
     case Left  => Up
+    case Identity => Identity
   }
 
 }
 
-case object Left extends Direction((-1, 0)) {}
-case object Right extends Direction((1, 0)) {}
-case object Up extends Direction((0, -1)) {}
-case object Down extends Direction((0, 1)) {}
+case object Left extends Direction((-1, 0))
+case object Right extends Direction((1, 0))
+case object Up extends Direction((0, -1))
+case object Down extends Direction((0, 1))
+case object Identity extends Direction((0, 0))

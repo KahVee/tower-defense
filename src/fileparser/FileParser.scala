@@ -97,7 +97,7 @@ class FileParser {
       def loadImage(name: String, imageType: String) = {
         val imageSize = if (imageType == "tile") TileSize else EnemySize
         try {
-          new Image(new FileInputStream("pics/" + name), imageSize, imageSize, true, false)
+          new Image(new FileInputStream("./pics/" + name), imageSize, imageSize, true, false)
         } catch {
           case e: FileNotFoundException =>
             throw new MapFileException(s"Error finding $name")
@@ -196,9 +196,9 @@ class FileParser {
             tile match {
               case "empty" => createEmptyTile()
               case tile if tile.startsWith("entry") =>
-                createPath(Some(findDirection(tile.split('-')(1))), None); entryTile = Some(tiles.last)
+                createPath(findDirection(tile.split('-')(1)), None); entryTile = Some(tiles.last)
               case tile if tile.startsWith("exit") =>
-                createPath(None, Some(findDirection(tile.split('-')(1)))); exitTile = Some(tiles.last)
+                createPath(None, findDirection(tile.split('-')(1))); exitTile = Some(tiles.last)
               case "path"     => createPath(None, None)
               case "tower"    => createTower()
               case "building" => createBuilding()
@@ -206,13 +206,15 @@ class FileParser {
             }
           }
 
+          //TODO: "center" => dir(0, 0)
           def findDirection(input: String) = {
             input match {
-              case input if input.startsWith("up")    => Up
-              case input if input.startsWith("down")  => Down
-              case input if input.startsWith("left")  => Left
-              case input if input.startsWith("right") => Right
-              case _                                  => throw new MapFileException("Couldn't determine entry/exit direction")
+              case input if input.startsWith("up")     => Some(Up)
+              case input if input.startsWith("down")   => Some(Down)
+              case input if input.startsWith("left")   => Some(Left)
+              case input if input.startsWith("right")  => Some(Right)
+              case input if input.startsWith("center") => Some(Identity)
+              case _                                   => throw new MapFileException("Couldn't determine entry/exit direction")
             }
           }
 
