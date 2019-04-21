@@ -4,7 +4,6 @@ import scalafx.scene.image._
 package object towerdefense {
 
   //GENERAL
-  val Tickrate = 40L
   val TileSize = 64
   val TileGridLinesVisible = false
   val SidebarPadding = 2
@@ -35,8 +34,7 @@ package object towerdefense {
   val DefaultDifficulty = 3
   val DefaultLevelSize = (10, 10)
   
-
-  //TEMPORARY
+  //IMAGES
   val DefaultImage = new Image(new FileInputStream("pics/grass.png"), TileSize, TileSize, true, false)
   val EnemyImage = new Image(new FileInputStream("pics/enemy.png"), EnemySize, EnemySize, true, false)  
 }
