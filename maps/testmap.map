@@ -36,7 +36,7 @@ TILES
 		ID: 04
 		PIC: tower.png
 		TYPE: Tower
-		PRICE: X10 Y5
+		PRICE: X10 Y1
 		DAMAGE: 2
 		RELOAD: 1
 	ENDTILE
@@ -44,9 +44,9 @@ TILES
 		ID: 05
 		PIC: farm.png
 		TYPE: Building
-		PRICE: X5 Y20
-		PRODUCTION: X1 Y2
-		SPEED: 30
+		PRICE: X20 Y5
+		PRODUCTION: X5 Y1
+		SPEED: 10
 	ENDTILE
 ENDTILES
 
