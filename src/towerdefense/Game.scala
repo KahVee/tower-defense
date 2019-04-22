@@ -14,12 +14,13 @@ class Game(val name: String, val grid: Grid, var resX: Int, var resY: Int, var b
 
   def isLost = health <= 0
 
-  //DEBUGGING METHOD FOR NOW
+  //Starting method, which initializes buildings that were already present on the loaded map
   def start() = {
     builtBuildings = grid.grid.flatten.filter(_.isInstanceOf[Building]).map(_.asInstanceOf[Building]).toVector
     builtBuildings.foreach(_.isActive = true)
   }
-
+   
+  //Gets called every tick. Updates all enemies and buildings, and calls enemy spawning methods if necessary
   def step(dt: Float) = {
     enemies.foreach(_.step(dt))
     health -= enemies.filter(_.reachedTarget).size
@@ -36,6 +37,8 @@ class Game(val name: String, val grid: Grid, var resX: Int, var resY: Int, var b
 
     //If there are enemies in the spawn queue, spawn a new one when the appropriate time has passed
     if (!queuedEnemies.isEmpty && timePassed > lastSpawnedEnemyTime + EnemySpawnInterval) spawnEnemyFromQueue
+    
+    //update the game's current "time" with deltaTime
     timePassed += dt
   }
 

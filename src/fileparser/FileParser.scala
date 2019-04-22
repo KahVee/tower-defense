@@ -239,12 +239,6 @@ class FileParser {
           if (!curLine.startsWith("endtile")) matchTileProperties()
         }
 
-        //Reads the price, formatted as "X20 Y20"
-        def readPrice = {
-          val rawPrice = split(curLine).split(' ').map(_.replaceAll("\\D", "").toInt)
-          (rawPrice(0), rawPrice(1))
-        }
-
         //Loop this method recursively until ENDTILE reached. After that, if MAP is also read, create a Grid
         if (!tilesRead) readTileData() else if (mapRead) createGrid()
       } //readTileData()
