@@ -3,6 +3,10 @@ import scalafx.scene.image._
 
 package object towerdefense {
 
+  //MAPNAME
+  //The user must choose the map in question using this line, as a main menu is not yet implemented.
+  val MapName = "testmap.map"
+  
   //GENERAL
   val TileSize = 64
   val TileGridLinesVisible = false

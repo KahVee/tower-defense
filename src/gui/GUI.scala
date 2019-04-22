@@ -52,8 +52,15 @@ object GUI extends JFXApp {
 
   //Main game loop starting, creates the game, window and the layout within the window
   start()
-  def start() = {
-    game = parser.loadLevel("maps/bigmap.map")
+  def start() : Unit= {
+    try {
+    game = parser.loadLevel("maps/" + MapName)
+    } catch {
+      case e: MapFileException =>
+        println("ERROR: " + e.getMessage)
+        println("Quitting...")
+        System.exit(0)
+    }
     mainCanvas = new Canvas(TileSize * game.grid.grid.size, TileSize * game.grid.grid(0).size)
     gc = mainCanvas.graphicsContext2D
     centerContentVector = Vector(mainCanvas, ButtonGrid.makeGrid(game.grid.grid.size, game.grid.grid(0).size))
@@ -133,6 +140,7 @@ object GUI extends JFXApp {
 
   //This method updates the scene, which gets drawn automatically. The parameter is a list of the contents for the scene
   def updateScene() = {
+    //gc.clearRect(0, 0, game.grid.grid.size * TileSize, game.grid.grid(0).size * TileSize)
     //getDrawables returns a vector of images, each of which has its coordinates stored in the tuple's second and third slot
     game.getDrawables.foreach(x => gc.drawImage(x._1, x._2, x._3))
     if(DebugMode) gc.fillText(fpsString, 0, 10)
