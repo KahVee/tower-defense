@@ -66,7 +66,7 @@ object GUI extends JFXApp {
     centerContentVector = Vector(mainCanvas, ButtonGrid.makeGrid(game.grid.grid.size, game.grid.grid(0).size))
 
     bottomGc.setFill(White)
-    bottomGc.setFont(Font.font(20))
+    bottomGc.setFont(Font.font("Calibri", 20))
 
     stage = new JFXApp.PrimaryStage {
       title.value = "Tower Defense"
