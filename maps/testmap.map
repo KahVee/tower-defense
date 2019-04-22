@@ -69,13 +69,13 @@ ENEMIES
 	ENEMY : RUNNER
 		SPEED: 2
 		HEALTH: 4
-		PIC: enemy.png
+		PIC: fastenemy.png
 		REWARD: X1 Y0
 	ENDENEMY
 	ENEMY : BIGBOI
 		SPEED: 1
 		HEALTH: 30
-		PIC: enemy.png
+		PIC: bigenemy.png
 		REWARD: X3 Y1
 	ENDENEMY
 ENDENEMIES
