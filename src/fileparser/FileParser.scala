@@ -8,10 +8,6 @@ import scalafx.scene.image._
 class FileParser {
 
   def loadLevel(filepath: String): Game = {
-    /*
-    val grid = new Grid()
-    val game = new Game()
-*/
 
     //METADATA
     var name = DefaultLevelName

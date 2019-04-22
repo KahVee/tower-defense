@@ -62,17 +62,21 @@ class Tower(name: String, image: Image, coords: (Int, Int), price: (Int, Int), p
     if (isActive) {
       if (now > lastShotTime + reload) {
         target = findClosestTarget(game.enemies.filterNot(_.isDead))
-        if (target.isDefined) {
+        if (target.isDefined && squareDistanceToEnemy(target.get) < range * range) {
           target.get.takeDamage(damage)
           lastShotTime = now
         }
       }
     }
   }
+  
+  private def squareDistanceToEnemy(enemy: Enemy) = {
+    math.pow((coords._1 - enemy.coords._1), 2) + math.pow((coords._2 - enemy.coords._2), 2)
+  }
 
   private def findClosestTarget(enemies: Vector[Enemy]) = {
     if (enemies.nonEmpty)
-      Some(enemies.minBy(x => math.pow((coords._1 - x.coords._1), 2) + math.pow((coords._2 - x.coords._2), 2)))
+      Some(enemies.minBy(squareDistanceToEnemy))
     else
       None
   }
