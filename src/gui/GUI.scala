@@ -103,7 +103,6 @@ object GUI extends JFXApp {
           //Bottom contains the pause button
           bottom = new HBox {
             spacing = BottomPadding
-            //TODO: Fix the resourceText, currently it doesn't update properly
             children = Vector(pauseButton, bottomCanvas)
           }
 

@@ -45,7 +45,6 @@ class Enemy(val name: String, var image: Image, private val speed: Int = Default
       } else {
         //Checks if next tile forward is a path or if it was the tile the enemy came from and rotates if necessary
         //Uses .toInt instead of .round to stay close to the centers of the tiles
-        //TODO: Make infinite loop not possible
         if (currentTile != Some(grid.exitTile)) {
           while ((!nextTile.getOrElse(grid.referenceEmptyTile).isInstanceOf[TraversableTile]) || nextTile == lastTile) {
             direction = direction.clockwise
