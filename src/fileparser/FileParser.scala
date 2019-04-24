@@ -114,7 +114,12 @@ class FileParser {
           i <- 0 until size._1;
           j <- 0 until size._2
         ) {
+          try {
           arr(i)(j) = tiles(transposedIdGrid(i)(j)).clone(i, j)
+          } catch {
+            case e: IndexOutOfBoundsException =>
+              throw new MapFileException("Unknown tile ID in MAP")
+          }
           if (tiles(transposedIdGrid(i)(j)) == entryTile.getOrElse(throw new MapFileException("Error readimg map file")))
             entryTile = Some(arr(i)(j))
 
