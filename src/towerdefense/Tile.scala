@@ -22,34 +22,18 @@ class Building(name: String, image: Image, coords: (Int, Int), val price: (Int, 
 
   override val buildable = false
   var isActive = false
-  protected val game = gui.GUI.game
+  protected val game = gui.GUI.activeGame
 
   def step(now: Float) = ()
-  
+
   override def clone(newCoords: (Int, Int)) = new Building(this.name, this.image, newCoords, this.price)
+
+  def tooltip = s"$name\nX: ${price._1} Y: ${price._2}"
 
   override def toString = "building at " + coords.toString
 }
 
-//"Production" is how many times per minute a building produces 1x of the resource
-class ProductionBuilding(name: String, image: Image, coords: (Int, Int), price: (Int, Int), private val productionAmount: (Int, Int) = DefaultBuildingProductionAmount, private val productionSpeed: Int = DefaultBuildingProductionSpeed) extends Building(name, image, coords, price) {
-
-  private var lastProductionTime = 0F
-
-  override def step(now: Float) = {
-    if (isActive) {
-      if (now > lastProductionTime + (60.0 / productionSpeed)) {
-        game.resX += productionAmount._1
-        game.resY += productionAmount._2
-        lastProductionTime = now
-      }
-    }
-  }
-
-  override def clone(newCoords: (Int, Int)) = new ProductionBuilding(this.name, this.image, newCoords, this.price, this.productionAmount, this.productionSpeed)
-}
-
-class Tower(name: String, image: Image, coords: (Int, Int), price: (Int, Int), private val damage: Int = DefaultTowerDamage, private val reload: Float = DefaultReload, private val range: Int = DefaultRange) extends Building(name, image, coords, price) {
+class Tower(name: String, image: Image, coords: (Int, Int), price: (Int, Int), private val damage: Int = DefaultTowerDamage, private val reload: Float = DefaultReload, val range: Int = DefaultRange) extends Building(name, image, coords, price) {
 
   private var target: Option[Enemy] = None
   private var lastShotTime = 0F
@@ -69,7 +53,7 @@ class Tower(name: String, image: Image, coords: (Int, Int), price: (Int, Int), p
       }
     }
   }
-  
+
   private def squareDistanceToEnemy(enemy: Enemy) = {
     math.pow((coords._1 - enemy.coords._1), 2) + math.pow((coords._2 - enemy.coords._2), 2)
   }
@@ -81,5 +65,27 @@ class Tower(name: String, image: Image, coords: (Int, Int), price: (Int, Int), p
       None
   }
 
+  override def tooltip = s"$name\nX: ${price._1} Y: ${price._2}\nDamage: $damage\nReload: $reload\nRange: $range"
+
   override def toString = "tower at " + coords.toString
+}
+
+//"Production" is how many times per minute a building produces 1x of the resource
+class ProductionBuilding(name: String, image: Image, coords: (Int, Int), price: (Int, Int), private val productionAmount: (Int, Int) = DefaultBuildingProductionAmount, private val productionSpeed: Int = DefaultBuildingProductionSpeed) extends Building(name, image, coords, price) {
+
+  private var lastProductionTime = 0F
+
+  override def clone(newCoords: (Int, Int)) = new ProductionBuilding(this.name, this.image, newCoords, this.price, this.productionAmount, this.productionSpeed)
+
+  override def step(now: Float) = {
+    if (isActive) {
+      if (now > lastProductionTime + (60.0 / productionSpeed)) {
+        game.resX += productionAmount._1
+        game.resY += productionAmount._2
+        lastProductionTime = now
+      }
+    }
+  }
+
+  override def tooltip = s"$name\nX: ${price._1} Y: ${price._2}\nProduction: ${productionAmount._1}/${productionAmount._2}\nSpeed: $productionSpeed"
 }

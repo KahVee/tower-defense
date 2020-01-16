@@ -115,7 +115,7 @@ class FileParser {
           j <- 0 until size._2
         ) {
           try {
-          arr(i)(j) = tiles(transposedIdGrid(i)(j)).clone(i, j)
+            arr(i)(j) = tiles(transposedIdGrid(i)(j)).clone(i, j)
           } catch {
             case e: IndexOutOfBoundsException =>
               throw new MapFileException("Unknown tile ID in MAP")
@@ -184,7 +184,8 @@ class FileParser {
         var speed = DefaultBuildingProductionSpeed
 
         curLine match {
-          case curLine if curLine.startsWith("tile")     => nextTile()
+          case curLine if curLine.startsWith("tile")     =>
+            name = split(curLine).capitalize; nextTile()
           case curLine if curLine.startsWith("endtiles") => tilesRead = true
 
         }

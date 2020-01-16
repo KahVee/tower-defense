@@ -4,6 +4,7 @@ import scalafx.scene.layout.GridPane
 import scalafx.scene.control.Button
 import scalafx.Includes._
 import scalafx.scene.text.Font
+import scalafx.scene.control.Tooltip
 
 import towerdefense._
 
@@ -31,6 +32,10 @@ object ButtonGrid {
 
           //Makes a "highlight" on the tile the mouse is currently hovering on
           style <== when(hover) choose "-fx-background-color: rgba(0, 0, 0, 0.05);" otherwise "-fx-background-color: rgba(0, 0, 0, 0);"
+
+          onMouseMoved = e => {
+            GUI.mouseMoveOnGrid(e, this)
+          }
 
           onAction = e => {
             GUI.mouseClickOnGrid(this)

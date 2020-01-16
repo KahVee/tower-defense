@@ -19,7 +19,7 @@ class Game(val name: String, val grid: Grid, var resX: Int, var resY: Int, var b
     builtBuildings = grid.grid.flatten.filter(_.isInstanceOf[Building]).map(_.asInstanceOf[Building]).toVector
     builtBuildings.foreach(_.isActive = true)
   }
-   
+
   //Gets called every tick. Updates all enemies and buildings, and calls enemy spawning methods if necessary
   def step(dt: Float) = {
     enemies.foreach(_.step(dt))
@@ -37,29 +37,23 @@ class Game(val name: String, val grid: Grid, var resX: Int, var resY: Int, var b
 
     //If there are enemies in the spawn queue, spawn a new one when the appropriate time has passed
     if (!queuedEnemies.isEmpty && timePassed > lastSpawnedEnemyTime + EnemySpawnInterval) spawnEnemyFromQueue
-    
+
     //update the game's current "time" with deltaTime
     timePassed += dt
   }
 
-  //Returns all the tiles and enemies of the game in a Vector
-  //TODO: store the "canvas space" coordinates somewhere so that this method won't have to calculate them every frame
-  def getDrawables: Vector[(Image, Int, Int)] = {
-    //Converts a 2D tile array to Vector[Image, Int, Int)], where the Ints are X and Y coords of the image
-    def tileArrayToVector(array: Array[Array[towerdefense.Tile]]) = {
-      val buffer = Buffer[(Image, Int, Int)]()
-      array.flatten.foreach(tile => buffer += ((tile.image, tile.coords._1 * TileSize, tile.coords._2 * TileSize)))
-      buffer.toVector
-    }
+  //Returns images and game space coordinates of all tiles in one Vector
+  def tileDrawables = {
+    val buffer = Buffer[(Image, Int, Int)]()
+    grid.grid.flatten.foreach(tile => buffer += ((tile.image, tile.coords._1, tile.coords._2)))
+    buffer.toVector
+  }
 
-    //Converts Vector[Enemy] into Vector[(Image, Int, Int)], where the Ints are X and Y coords of the image
-    def enemyVectorToImageVector(vector: Vector[Enemy]) = {
-      val buffer = Buffer[(Image, Int, Int)]()
-      vector.foreach(enemy => buffer += ((enemy.image, (enemy.coords._1 * TileSize + EnemySize / 2).round, (enemy.coords._2 * TileSize + EnemySize / 2).round)))
-      buffer.toVector
-    }
-
-    tileArrayToVector(grid.grid) ++ enemyVectorToImageVector(enemies)
+  //Returns images and game space coordinates of all enemies in one Vector
+  def enemyDrawables = {
+    val buffer = Buffer[(Image, Float, Float)]()
+    enemies.foreach(enemy => buffer += ((enemy.image, enemy.coords._1 , enemy.coords._2)))
+    buffer.toVector
   }
 
   //Activates the next enemy from the queue, adds it to the active enemies Vector, and updates the last spawned time

@@ -15,7 +15,7 @@ TILES
 	ENDTILE
 	TILE: PATH
 		ID: 01
-		PIC: path.png
+		PIC: gray.png
 		TYPE: Path
 	ENDTILE
 	TILE: ENTRY
@@ -25,7 +25,7 @@ TILES
 	ENDTILE
 	TILE: EXIT
 		ID: 03
-		PIC: exit.png
+		PIC: grayflag.png
 		TYPE: Exit-Right
 	ENDTILE
 	TILE: TOWER1
