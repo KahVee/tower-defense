@@ -25,7 +25,10 @@ import scalafx.scene.input._
 
 object GUI extends JFXApp {
 
+  //Currently active game
   var activeGame: Game = null
+
+  //Vector of all maps in the /maps folder
   var games: Vector[Game] = Vector()
 
   val time = new Time
@@ -34,6 +37,7 @@ object GUI extends JFXApp {
 
   var mainMenu: MainMenu = null
 
+  //AnimationTimer handles the update() calling
   val timer = new AnimationTimer {
     override def handle(now: Long) = update()
   }
@@ -47,6 +51,7 @@ object GUI extends JFXApp {
   private var tiles: Vector[(Image, Int, Int)] = Vector()
   private var enemies: Vector[(Image, Int, Int)] = Vector()
 
+  //Bottom Canvas that is used to draw up to date resource texts
   private val bottomCanvas = new Canvas(120, 64)
   private val bottomGc = bottomCanvas.graphicsContext2D
 
@@ -59,8 +64,8 @@ object GUI extends JFXApp {
 
   val parser = new FileParser
 
+  //Application starting
   start()
-
   def start() = {
 
     //Loads all maps from the folder into games array
@@ -98,9 +103,11 @@ object GUI extends JFXApp {
 
     activeGame = game
 
+    //Sizes the canvas based on the chosen map
     mainCanvas = new Canvas(TileSize * activeGame.grid.grid.size, TileSize * activeGame.grid.grid(0).size)
-
     gc = mainCanvas.graphicsContext2D
+
+    //Sets the main canvas and ButtonGrid as the center content
     centerContentVector = Vector(mainCanvas, ButtonGrid.makeGrid(activeGame.grid.grid.size, activeGame.grid.grid(0).size))
 
     bottomGc.setFill(White)
@@ -187,6 +194,7 @@ object GUI extends JFXApp {
       drawRangeCircle()
     }
 
+    //Draws fps if DebugMode is enabled
     if (DebugMode) gc.fillText(fpsString, 0, 10)
     bottomGc.clearRect(0, 0, 120, 64)
     bottomGc.fillText(healthString, 0, 15)
@@ -205,6 +213,7 @@ object GUI extends JFXApp {
     tiles = buffer.toVector
   }
 
+  //Updates the Vector that stores the currently active images of enemies and their coords in screen space
   def updateEnemyDrawables(raw: Vector[(Image, Float, Float)]) = {
     val buffer = Buffer[(Image, Int, Int)]()
     raw.foreach(image => buffer += ((image._1, (image._2 * TileSize + EnemySize / 2).round, (image._3 * TileSize + EnemySize / 2).round)))
@@ -226,7 +235,8 @@ object GUI extends JFXApp {
     val y = (button.layoutY.value / TileSize).round.toInt
     (x, y)
   }
-
+  
+  //Gets the mouse coordinates for drawing tower ranges
   def mouseMoveOnGrid(event: MouseEvent, button: Button) = {
     val coords = getButtonCoordinates(button)
     mouseX = event.getX() + TileSize * coords._1

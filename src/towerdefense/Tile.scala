@@ -2,6 +2,7 @@ package towerdefense
 
 import scalafx.scene.image._
 
+//Grand parent of the Tile family. Note that this parent class should never have object instances
 class Tile(val name: String, val image: Image, val coords: (Int, Int)) {
   val buildable = true
 
@@ -10,6 +11,8 @@ class Tile(val name: String, val image: Image, val coords: (Int, Int)) {
   override def toString = "tile at " + coords.toString
 }
 
+//Normal "path" tile, on which enemies move forward. If entryDirection is defined, the tile is treated as a spawn tile, next to which enemies spawn.
+//Similarily exitDirection is defined on goal tiles, where enemies exit the map.
 class TraversableTile(name: String, image: Image, coords: (Int, Int), val entryDirection: Option[Direction], val exitDirection: Option[Direction]) extends Tile(name, image, coords) {
   override val buildable = false
 
@@ -18,6 +21,7 @@ class TraversableTile(name: String, image: Image, coords: (Int, Int), val entryD
   override def toString = "path at " + coords.toString
 }
 
+//Parent for both types of buildable buildings (Tower, ProductionBuilding). There should never be any object instances of this class.
 class Building(name: String, image: Image, coords: (Int, Int), val price: (Int, Int)) extends Tile(name, image, coords) {
 
   override val buildable = false
@@ -33,6 +37,7 @@ class Building(name: String, image: Image, coords: (Int, Int), val price: (Int, 
   override def toString = "building at " + coords.toString
 }
 
+//Buildable tower tile
 class Tower(name: String, image: Image, coords: (Int, Int), price: (Int, Int), private val damage: Int = DefaultTowerDamage, private val reload: Float = DefaultReload, val range: Int = DefaultRange) extends Building(name, image, coords, price) {
 
   private var target: Option[Enemy] = None
@@ -70,7 +75,7 @@ class Tower(name: String, image: Image, coords: (Int, Int), price: (Int, Int), p
   override def toString = "tower at " + coords.toString
 }
 
-//"Production" is how many times per minute a building produces 1x of the resource
+//Buildable resource-producing tile
 class ProductionBuilding(name: String, image: Image, coords: (Int, Int), price: (Int, Int), private val productionAmount: (Int, Int) = DefaultBuildingProductionAmount, private val productionSpeed: Int = DefaultBuildingProductionSpeed) extends Building(name, image, coords, price) {
 
   private var lastProductionTime = 0F

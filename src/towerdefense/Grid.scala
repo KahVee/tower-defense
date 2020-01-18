@@ -2,11 +2,15 @@ package towerdefense
 
 import scala.math.Numeric.Implicits.infixNumericOps
 
+//Grid represents the background tiles and acts as their "storage" object.
 class Grid(val grid: Array[Array[Tile]], val entryTile: Tile, val exitTile: Tile) {
   
+  //Barebones tile object that enemies use for pathfinding
   val referenceEmptyTile = new Tile("referencetile", DefaultImage, (0, 0))
 
+  //Finds the tile next to given coordinates towards dir and returns it in an Option
   def nextTile(dir: Direction, coords: (Int, Int)) = {
+
     val next = dir + coords
 
     if (grid.indices.contains(next._1) && grid(0).indices.contains(next._2)) {
@@ -16,6 +20,7 @@ class Grid(val grid: Array[Array[Tile]], val entryTile: Tile, val exitTile: Tile
     }
   }
 
+  //Converts given world coordinates to grid coordinates and returns the corresponding tile in an Option
   def currentTile(coords: (Float, Float)) = {
     val rounded = (coords._1.round, coords._2.round)
     if (grid.indices.contains(rounded._1) && grid(0).indices.contains(rounded._2)) {
@@ -26,6 +31,8 @@ class Grid(val grid: Array[Array[Tile]], val entryTile: Tile, val exitTile: Tile
   }
 }
 
+//Simple class that has five enumerations for each direction, as well as "identity"
+//Some helper methods are added to ease the multiplication and addition of vectors
 sealed abstract class Direction(val dir: (Int, Int)) {
   def *(tuple: (Float, Float)) = (dir._1 * tuple._1, dir._2 * tuple._2)
   def *(f: Float) = (dir._1 * f, dir._2 * f)
