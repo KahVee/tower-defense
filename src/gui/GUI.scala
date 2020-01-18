@@ -73,6 +73,7 @@ object GUI extends JFXApp {
       val folder = new File("maps/")
       if (folder.exists && folder.isDirectory) {
         val pathList = folder.listFiles.map(_.getPath).toVector
+		games = Vector()
         for (path <- pathList) {
           games = games :+ parser.loadLevel(path)
         }
